@@ -11,6 +11,13 @@
 #include <GLFW/glfw3.h>
 #include <GL/freeglut.h>
 
+
+#include <GLM/vec3.hpp>
+#include <GLM/vec4.hpp>
+#include <GLM/mat4x4.hpp>
+#include <GLM/gtc/matrix_transform.hpp>
+#include <GLM/gtc/type_ptr.hpp>
+
 #include "File.h"
 #include "Vertex.h"
 #include "shader.hpp"
@@ -23,15 +30,14 @@ int frameCount = 0;
 double initialTime, finalTime, actual_frame_duration; // tiempo inicial, tiempo final, contador de frames
 double frame_duration = (1 / (float)FPS);
 File archivo("cube.obj");
-
+glm::mat4 model, view, projection;
 
 
 using namespace std;
 
 GLFWwindow* InitWindow(const int resX, const int resY);
-void display(GLFWwindow* window, int aux);
-void controls(GLFWwindow* window, int key, int scancode, int action, int mods);
-void loadVertices(vector<GLfloat> vertices);
+void display(GLFWwindow* window);
+void genMatrices();
 
 
 int main()
@@ -42,12 +48,11 @@ int main()
 	GLFWwindow* window = InitWindow(1024, 620);
 	if (archivo.loadFile())
 	{
-		const int aux = archivo.returnLenght();
 		if (window)
-			display(window, aux);
+			display(window);
 	}
 	glfwDestroyWindow(window);
-	glfwTerminate();
+	
 	return 0;
 }
 
@@ -75,7 +80,7 @@ GLFWwindow* InitWindow(const int resX, const int resY)
 	}
 
 	glfwMakeContextCurrent(window);
-	glfwSetKeyCallback(window, controls);
+	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
 	//Glew
 	glewExperimental = true;
@@ -101,14 +106,7 @@ GLFWwindow* InitWindow(const int resX, const int resY)
 	return window;
 }
 
-void controls(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-	if (action == GLFW_PRESS)
-		if (key == GLFW_KEY_ESCAPE)
-			glfwSetWindowShouldClose(window, GL_TRUE);
-}
-
-void display(GLFWwindow* window, int aux)
+void display(GLFWwindow* window)
 {
 
 	double endtime = 0, crntTime = 0, timeDiff;
@@ -117,43 +115,66 @@ void display(GLFWwindow* window, int aux)
 	
 	crntTime = glfwGetTime();
 
+	float vertices[] = {
+		1.000000, - 1.000000, - 1.000000,
+		1.000000, - 1.000000, 1.000000,
+		- 1.000000, - 1.000000, 1.000000,
+		- 1.000000, - 1.000000, - 1.000000,
+		1.000000, 1.000000,- 0.999999,
+		0.999999, 1.000000, 1.000001,
+		- 1.000000, 1.000000, 1.000000,
+		- 1.000000 , 1.000000, - 1.000000,
+	};
 
-	unsigned int VBO;
-	unsigned int VAO;
+	float vertices1[] = {
+		-0.5f, -0.5f, 0.0f,
+		 0.5f, -0.5f, 0.0f,
+		 0.0f,  0.5f, 0.0f
+	};
 
-	GLfloat* buffer = archivo.getBuffer();
+	archivo.createBuffer();
+	const GLfloat* buffer = archivo.getBuffer();
 
+
+	GLuint VBO;
+	GLuint VAO;
+
+	
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * (archivo.returnLenght() * 3), buffer, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);//Ubicación inicial, ubicación final, datatype, normalización, tamaño del stride (bloque de propiedades), valor inicial
-	
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(vertices1), vertices1, GL_STATIC_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * (archivo.returnLenght() * 3), buffer, GL_STATIC_DRAW);
+
+
+	//Ubicación inicial, ubicación final, datatype, normalización, tamaño del stride (bloque de propiedades), valor inicial
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
 	glEnableVertexAttribArray(0);
 
 
 
-	/*GLuint programID =
-		LoadShaders(
-		"D:\\OneDrive - Universidad Autonoma de San Luis Potosi - UASLP\\Tuf\\UASLP\\8sem\\Programacion de Videojuegos\\LectorOBJ"
-		,"D:\\OneDrive - Universidad Autonoma de San Luis Potosi - UASLP\\Tuf\\UASLP\\8sem\\Programacion de Videojuegos\\LectorOBJ");
-*/
+	//GLuint programID =
+	//	LoadShaders(
+	//	"D:/OneDrive - Universidad Autonoma de San Luis Potosi - UASLP/Tu/UASLP/8sem/Programacion de Videojuegos/LectorOBJ"
+	//	,"D:/OneDrive - Universidad Autonoma de San Luis Potosi - UASLP/Tuf/UASLP/8sem/Programacion de Videojuegos/LectorOBJ");
+
 
 	do
 	{
 		initialTime = glfwGetTime();
 		
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		glBindVertexArray(VAO);
 		
 		//glUseProgram(programID);
 		glBindVertexArray(VAO);
-		
-		glDrawArrays(GL_TRIANGLES, 0, archivo.returnLenght());
+
+
+		glDrawArrays(GL_TRIANGLES, 0, 8);
+		//glDrawArrays(GL_TRIANGLES, 0, 3);
+		//glDrawArrays(GL_TRIANGLES, 0, archivo.returnLenght());
 
 		
 
@@ -172,7 +193,7 @@ void display(GLFWwindow* window, int aux)
 		timeDiff = endtime - crntTime;
 		if (timeDiff >= 1.0)
 		{
-			//system("cls");
+			system("cls");
 			cout << "FPS: " << counter << endl;
 			cout << "Vertices a cargar: " << archivo.returnLenght() << endl;
 			crntTime = glfwGetTime();
@@ -184,27 +205,22 @@ void display(GLFWwindow* window, int aux)
 	glDeleteVertexArrays(1, &VAO);
 	//glDeleteProgram(programID);
 
+	glfwTerminate();
 }
 
-void loadVertices(vector<GLfloat> vertices)
-{
-	
+void genMatrices() {
+	//Modelo
+	model = glm::mat4(1);
+	model = glm::translate(model, glm::vec3(0.5f, 0.0f, 0.0f));
+	model = glm::rotate(model, glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	//angle += 0.1f;
 
-	/*int j = 0;
+	//Vista
+	glm::vec3 eye(0.0f, 0.0f, 5.0f);
+	glm::vec3 center(0.0f, 0.0f, 0.0f);
+	glm::vec3 up(0.0f, 1.0f, 0.0f);
+	view = glm::lookAt(eye, center, up);
 
-	for (int i = 0; i != vertices.size(); ++i)
-	{
-		if (j <= 2)
-		{
-			cout << "-" << vertices[i];
-			j++;
-		}
-		else
-		{
-			cout << " " << endl;
-			j = 0;
-		}
-	}
-
-	Sleep(600000);*/
+	//Proyeccion
+	projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 }

@@ -108,15 +108,29 @@ void File::createBuffer()
 {
 	GLfloat* aux;
 	int size = (list_vertices.size() * 3);
-	aux = (GLfloat*)malloc((sizeof(GLfloat)));
+	aux = new GLfloat[size];
 	int j = 0;
+	int k = 0;
 
-	for (int i = 0; i != list_vertices.size(); ++i)
+	for (int i = 0; i < list_vertices.size(); i++)
 	{
-		aux[j++] = list_vertices[i].returnX();
-		aux[j++] = list_vertices[i].returnY();
-		aux[j++] = list_vertices[i].returnZ();
+		if (aux)
+		{
+			aux[j] = list_vertices[i].returnX();
+			j++;
+			aux[j] = list_vertices[i].returnY();
+			j++;
+			aux[j] = list_vertices[i].returnZ();
+			j++;
+			//cout << "X: " << list_vertices[i].returnX() << "Y: " << list_vertices[i].returnY() << "Z: " << list_vertices[i].returnZ() << endl;
+		}
 	}
+
+	//for (int i = 0; i < size; i++)
+	//{
+	//	cout << "V: " << aux[i] << endl;
+	//}
+
 
 	buffer = aux;
 }

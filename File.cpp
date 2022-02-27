@@ -76,3 +76,8 @@ void File::show_specific_vertex_data(int _index)
 {
 	list_vertices[--_index].showVertex_info();
 }
+
+vector<Vertex> File::return_VertexList()
+{
+	return list_vertices;
+}

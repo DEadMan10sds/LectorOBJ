@@ -25,5 +25,6 @@ class File
 		void show_text_data();
 		void show_vertex_data();
 		void show_specific_vertex_data(int _index);
+		vector<Vertex>  return_VertexList();
 };
 

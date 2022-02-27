@@ -39,3 +39,8 @@ void Object::showFacesList()
 		itr_faces_list->showFaceVertices();
 	}
 }
+
+vector<Face> Object::returnFaceList()
+{
+	return list_faces;
+}

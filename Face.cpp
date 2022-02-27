@@ -23,3 +23,8 @@ void Face::showFaceVertices()
 	}
 	cout << endl;
 }
+
+vector<int> Face::returnVertexList()
+{
+	return list_vertices_face;
+}

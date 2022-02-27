@@ -15,5 +15,6 @@ class Face
 		void addVertex(int _vertex);
 		int showFaceIndex();
 		void showFaceVertices();
+		vector<int> returnVertexList();
 };
 

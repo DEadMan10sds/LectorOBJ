@@ -5,7 +5,11 @@ out vec4 FragColor;
 
 in vec4 colorVertice;
 
+uniform vec3 colorUniform;
+uniform float factorAmbiental;
+
 void main()
 {
-    FragColor = vec4(colorVertice.x, colorVertice.y, colorVertice.z, 1.0f);
+	FragColor = vec4(colorVertice.x, colorVertice.y, colorVertice.z, 1.0f);
+//	FragColor = vec4(colorUniform * factorAmbiental, 1.0f);
 } 

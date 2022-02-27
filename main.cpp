@@ -9,7 +9,12 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <GL/freeglut.h>
+
+#include <GLM/vec3.hpp>
+#include <GLM/vec4.hpp>
+#include <GLM/mat4x4.hpp>
+#include <GLM/gtc/matrix_transform.hpp>
+#include <GLM/gtc/type_ptr.hpp>
 
 #include "File.h"
 #include "Vertex.h"
@@ -19,22 +24,26 @@
 #define FPS 60 //FPS máximos
 
 //GLOBALES
+int resX = 1024, resY = 620;
 int frameCount = 0;
 double initialTime, finalTime, actual_frame_duration; // tiempo inicial, tiempo final, contador de frames
 double frame_duration = (1 / (float)FPS);
-File archivo("cube.obj");
+File archivo("perfect_cube.obj");
 
 using namespace std;
+using namespace glm;
+
+mat4 model, view, projection;
 
 GLFWwindow* InitWindow(const int resX, const int resY);
 void display(GLFWwindow* window);
-
+void createMatrices();
 
 int main()
 {
 	//archivo.show_text_data();
 
-	GLFWwindow* window = InitWindow(1024, 620);
+	GLFWwindow* window = InitWindow(resX, resY);
 	if (archivo.loadFile())
 	{
 		if (window)
@@ -82,7 +91,7 @@ GLFWwindow* InitWindow(const int resX, const int resY)
 	}
 
 	//OpenGl
-	glClearColor(0.4f, 0.5f, 0.2f, 0.0f);
+	glClearColor(0.1f, 0.0f, 0.2f, 0.0f);
 	//glViewport(0, 0, 1000, 1000);
 	glEnable(GL_DEPTH_TEST);
 
@@ -104,37 +113,45 @@ void display(GLFWwindow* window)
 
 
 	GLfloat cube[] = {
-		1.000000, - 1.000000, - 1.000000,
-		1.000000, - 1.000000, 1.000000,
-		- 1.000000, - 1.000000, 1.000000,
-		- 1.000000, - 1.000000, - 1.000000,
-		1.000000, 1.000000,- 0.999999,
-		0.999999, 1.000000, 1.000001,
-		- 1.000000, 1.000000, 1.000000,
-		- 1.000000 , 1.000000, - 1.000000,
+		1.000000, -1.000000, -1.000000, 1.0f, 0.0f, 0.0f,
+		1.000000, -1.000000,  1.000000, 1.0f, 0.0f, 1.0f,
+	   -1.000000, -1.000000,  1.000000, 1.0f, 0.0f, 0.0f,
+	   -1.000000, -1.000000, -1.000000, 1.0f, 1.0f, 0.0f,
+		1.000000,  1.000000, -0.999999, 1.0f, 0.0f, 1.0f,
+		0.999999,  1.000000,  1.000001, 1.0f, 0.0f, 0.0f,
+	   -1.000000,  1.000000,  1.000000, 1.0f, 1.0f, 0.0f,
+	   -1.000000,  1.000000, -1.000000, 1.0f, 0.0f, 1.0f
 	};
 
-	float vertices[] = {
+	float triangle2d[] = {
 		-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
 		 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-		 0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f
+		 0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
 	};
 
-	//archivo.createBuffer();
-	//const GLfloat* buffer = archivo.getBuffer();
+	archivo.createBuffer();
+	GLfloat* buffer = new GLfloat[archivo.returnBufferSize()];
+	for (int i = 0; i < archivo.returnLenght(); i++)
+	{
+		buffer[i] = archivo.getBufferData(i);
+	}
 
-	unsigned int VAO, VBO;
+	const GLfloat* vertices = buffer;
+
+	int tam = archivo.returnBufferSize() * 4;
+
+	GLuint VAO, VBO;
 
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 
 	glBindVertexArray(VAO);
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, tam, vertices, GL_STATIC_DRAW);
 
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
-			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)12);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), (void*)0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), (void*)(sizeof(GLfloat)*3));
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
@@ -152,10 +169,29 @@ void display(GLFWwindow* window)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glUseProgram(programID);
+
+		//VARIABLES UNIFORMES
+
+
+		/*int idUniform = glGetUniformLocation(programID, "colorUniform");
+		glUniform3f(idUniform, 1.0, 1.0, 1.0);*/
+
+		/*int idFactorAmb = glGetUniformLocation(programID, "factorAmbiental");
+		glUniform1f(idFactorAmb, 1.0f);*/
+
+		createMatrices();
+		int modelLoc = glGetUniformLocation(programID, "model");
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+		modelLoc = glGetUniformLocation(programID, "view");
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(view));
+		modelLoc = glGetUniformLocation(programID, "projection");
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(projection));
+
+
 		glBindVertexArray(VAO);
 
 		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);//Directiva de dibujo, cantidad de indices, tipo de dato de indices, inicio de indices
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawArrays(GL_TRIANGLES, 0, archivo.returnFaceaAmount()*3);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -187,4 +223,20 @@ void display(GLFWwindow* window)
 	glDeleteProgram(programID);
 
 	
+}
+
+void createMatrices()
+{
+	//Modelo
+	model = mat4(1);
+	translate(model, vec3(0.0f, 0.0f, 0.0f));
+
+	//Vista
+	vec3 eye(0.0f, 0.0f, 50.0f);
+	vec3 center(0.0f, 0.0f, 0.0f);
+	vec3 up(0.0f, 1.0f, 0.0f);
+	view = lookAt(eye, center, up);
+
+	//Proyección
+	projection = perspective(radians(45.0f), (float)(resX / resY), 0.1f, 100.0f);
 }

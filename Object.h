@@ -25,5 +25,6 @@ class Object
 		void showVertexList(vector<Vertex> file_vertex_list);
 		void addFace(Face _face);
 		void showFacesList();
+		vector<Face> returnFaceList();
 };
 

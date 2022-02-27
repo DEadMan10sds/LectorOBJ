@@ -59,7 +59,7 @@ bool File::loadFile()
 		return false;
 	}
 	NEWFILE.close();
-
+	faces_amount = number_face;
 	return true;
 }
 
@@ -106,36 +106,106 @@ GLfloat File::return_ZVertexList(int index)
 
 void File::createBuffer()
 {
-	GLfloat* aux;
-	int size = (list_vertices.size() * 3);
-	aux = new GLfloat[size];
-	int j = 0;
-	int k = 0;
-
-	for (int i = 0; i < list_vertices.size(); i++)
+	buffer_size = faces_amount * 3 * 6;
+	int color = 0;
+	list_Buffer_data.clear();
+	for (vector<Object>::iterator object_itr = list_object.begin(); object_itr != list_object.end(); (++object_itr))
 	{
-		if (aux)
+		vector<Face> objectFaces = object_itr->returnFaceList();
+		for (vector<Face>::iterator face_itr = objectFaces.begin(); face_itr != objectFaces.end(); (++face_itr))
 		{
-			aux[j] = list_vertices[i].returnX();
-			j++;
-			aux[j] = list_vertices[i].returnY();
-			j++;
-			aux[j] = list_vertices[i].returnZ();
-			j++;
-			//cout << "X: " << list_vertices[i].returnX() << "Y: " << list_vertices[i].returnY() << "Z: " << list_vertices[i].returnZ() << endl;
+			vector<int> vertices_face = face_itr->returnVertexList();
+			for (vector<int>::iterator index_face_list = vertices_face.begin(); index_face_list != vertices_face.end(); (++index_face_list))
+			{
+				vector<Vertex>::iterator index_vertices = list_vertices.begin();
+				advance(index_vertices, (*index_face_list) - 1);
+				index_vertices->showVertex_info();
+				Vertex vertice_aux = *index_vertices;
+				list_Buffer_data.push_back(vertice_aux.returnX());
+				list_Buffer_data.push_back(vertice_aux.returnY());
+				list_Buffer_data.push_back(vertice_aux.returnZ());
+				if (color == 0)
+					list_Buffer_data.push_back(1);
+				else
+					list_Buffer_data.push_back(0);
+				if (color == 1)
+					list_Buffer_data.push_back(1);
+				else
+					list_Buffer_data.push_back(0);
+				if (color == 2)
+					list_Buffer_data.push_back(1);
+				else
+					list_Buffer_data.push_back(0);
+				color++;
+				if (color == 3)
+					color = 0;
+			}
+
 		}
+
+		/*GLfloat* aux;
+		buffer_size = list_Buffer_data.size();
+		int j = 0;
+		aux = new GLfloat[buffer_size];
+		for (int i = 0; i < list_Buffer_data.size(); i++)
+		{
+			if (aux)
+			{
+				aux[i] = list_Buffer_data[i];
+			}
+		}
+		buffer = aux;*/
 	}
+
+	//int j = 0;
+	//GLfloat* aux;
+	//int size = list_vertices.size() * 3 * 2;
+	//aux = new GLfloat[size];
+
+	//for (int i = 0; i < list_vertices.size(); i++)
+	//{
+	//	if (aux)
+	//	{
+	//		aux[j] = list_vertices[i].returnX() / 2;
+	//		j++;
+	//		aux[j] = list_vertices[i].returnY() / 2;
+	//		j++;
+	//		aux[j] = list_vertices[i].returnZ() / 2;
+	//		j++;
+	//		aux[j] = 1.0f;
+	//		j++;
+	//		aux[j] = 1.0f;
+	//		j++;
+	//		aux[j] = 1.0f;
+	//		j++;
+	//		//cout << "X: " << list_vertices[i].returnX() << "Y: " << list_vertices[i].returnY() << "Z: " << list_vertices[i].returnZ() << endl;
+	//	}
+	//}
+
+	//buffer = aux;
 
 	//for (int i = 0; i < size; i++)
 	//{
 	//	cout << "V: " << aux[i] << endl;
 	//}
-
-
-	buffer = aux;
 }
 
 GLfloat* File::getBuffer()
 {
 	return buffer;
+}
+
+int File::returnBufferSize()
+{
+	return buffer_size;
+}
+
+int File::returnFaceaAmount()
+{
+	return faces_amount;
+}
+
+GLfloat File::getBufferData(int index)
+{
+	return list_Buffer_data[index];
 }

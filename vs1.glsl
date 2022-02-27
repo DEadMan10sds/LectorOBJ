@@ -5,10 +5,16 @@ layout (location = 1) in vec3 Color;
 
 out vec4 colorVertice;
 
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
 void main()
 {
+    vec4 PosVertice = vec4(Pos.x, Pos.y, Pos.z, 1.0);
+
     //gl_position en una variable out predefinida de tipo vec4
-    gl_Position = vec4(Pos.x, Pos.y, Pos.z, 1.0);
+    gl_Position = projection * view * model * PosVertice;
 
     colorVertice = vec4(Color.x, Color.y, Color.z, 1.0);
 }

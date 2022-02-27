@@ -4,6 +4,9 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#include <GL/freeglut.h>
 
 #include "Object.h"
 #include "Vertex.h"
@@ -19,12 +22,18 @@ class File
 		vector<Object>::iterator itr_object;
 		vector<Vertex> list_vertices;
 		vector<Vertex>::iterator itr_vertices;
+		GLfloat* buffer;
 	public: 
 		File(string _name);
-		void loadFile();
+		bool loadFile();
 		void show_text_data();
 		void show_vertex_data();
 		void show_specific_vertex_data(int _index);
-		vector<Vertex>  return_VertexList();
+		int returnLenght();
+		GLfloat return_XVertexList(int index);
+		GLfloat return_YVertexList(int index);
+		GLfloat return_ZVertexList(int index);
+		void createBuffer();
+		GLfloat* getBuffer();
 };
 

@@ -5,7 +5,7 @@ File::File(string _name)
 	file_name = _name;
 }
 
-void File::loadFile()
+bool File::loadFile()
 {
 	int number_Vertices = 0, number_face = 0, number_Objects = 0;
 	float x, y, z;
@@ -52,8 +52,15 @@ void File::loadFile()
 			}
 		}
 	}
-	else cout << "No se pudo abrir el archivo " << endl;
+	else
+	{
+		cout << "No se pudo abrir el archivo " << endl;
+		NEWFILE.close();
+		return false;
+	}
 	NEWFILE.close();
+
+	return true;
 }
 
 void File::show_text_data()
@@ -77,7 +84,44 @@ void File::show_specific_vertex_data(int _index)
 	list_vertices[--_index].showVertex_info();
 }
 
-vector<Vertex> File::return_VertexList()
+int File::returnLenght()
 {
-	return list_vertices;
+	return list_vertices.size();
+}
+
+GLfloat File::return_XVertexList(int index)
+{
+	return list_vertices[index].returnX();
+}
+
+GLfloat File::return_YVertexList(int index)
+{
+	return list_vertices[index].returnY();
+}
+
+GLfloat File::return_ZVertexList(int index)
+{
+	return list_vertices[index].returnZ();
+}
+
+void File::createBuffer()
+{
+	GLfloat* aux;
+	int size = (list_vertices.size() * 3);
+	aux = (GLfloat*)malloc((sizeof(GLfloat)));
+	int j = 0;
+
+	for (int i = 0; i != list_vertices.size(); ++i)
+	{
+		aux[j++] = list_vertices[i].returnX();
+		aux[j++] = list_vertices[i].returnY();
+		aux[j++] = list_vertices[i].returnZ();
+	}
+
+	buffer = aux;
+}
+
+GLfloat* File::getBuffer()
+{
+	return buffer;
 }

@@ -8,7 +8,7 @@ Vertex::Vertex(int _index)
 	z = 0;
 }
 
-void Vertex::load_Vertex_info(float _x, float _y, float _z)
+void Vertex::load_Vertex_info(GLfloat _x, GLfloat _y, GLfloat _z)
 {
 	x = _x;
 	y = _y;
@@ -18,4 +18,19 @@ void Vertex::load_Vertex_info(float _x, float _y, float _z)
 void Vertex::showVertex_info()
 {
 	cout << "X: " << x << " || Y: " << y << " || Z: " << z << endl;
+}
+
+GLfloat Vertex::returnX()
+{
+	return x;
+}
+
+GLfloat Vertex::returnY()
+{
+	return y;
+}
+
+GLfloat Vertex::returnZ()
+{
+	return z;
 }

@@ -44,5 +44,16 @@
     <ClInclude Include="Vertex.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="shader.hpp">
+      <Filter>Archivos de recursos</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="fs1.glsl">
+      <Filter>Archivos de recursos</Filter>
+    </None>
+    <None Include="vs1.glsl">
+      <Filter>Archivos de recursos</Filter>
+    </None>
   </ItemGroup>
 </Project>

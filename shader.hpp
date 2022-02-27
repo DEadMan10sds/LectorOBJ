@@ -46,7 +46,7 @@ GLuint LoadShaders(const char* vsPath, const char* fsPath)
 	{
 		std::vector<char> VertexShaderErrorMessage(InfoLogLength + 1);
 		glGetShaderInfoLog(VertexShaderID, InfoLogLength, NULL, &VertexShaderErrorMessage[0]);
-		printf("%s\n", &VertexShaderErrorMessage[0]);
+		printf("1: %s\n", &VertexShaderErrorMessage[0]);
 	}
 
 
@@ -62,7 +62,7 @@ GLuint LoadShaders(const char* vsPath, const char* fsPath)
 	{
 		std::vector<char> FragmentShaderErrorMessage(InfoLogLength + 1);
 		glGetShaderInfoLog(FragmentShaderID, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
-		printf("%s\n", &FragmentShaderErrorMessage[0]);
+		printf("2: %s\n", &FragmentShaderErrorMessage[0]);
 	}
 
 	GLuint ProgramID = glCreateProgram();
@@ -77,7 +77,7 @@ GLuint LoadShaders(const char* vsPath, const char* fsPath)
 	{
 		std::vector<char> ProgramErrorMessage(InfoLogLength + 1);
 		glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
-		printf("%s\n", &ProgramErrorMessage[0]);
+		printf("3: %s\n", &ProgramErrorMessage[0]);
 	}
 
 	glDetachShader(ProgramID, VertexShaderID);

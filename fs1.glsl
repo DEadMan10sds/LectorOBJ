@@ -3,9 +3,9 @@
 //debe de existir una variable de salida que es el color final
 out vec4 FragColor;
 
-in vec4 coloVertice;
+in vec4 colorVertice;
 
 void main()
 {
-    FragColor = vec4(coloVertice.x, coloVertice.y, coloVertice.z, 1.0f);
+    FragColor = vec4(colorVertice.x, colorVertice.y, colorVertice.z, 1.0f);
 } 

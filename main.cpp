@@ -32,7 +32,6 @@ void display(GLFWwindow* window);
 
 int main()
 {
-	
 	//archivo.show_text_data();
 
 	GLFWwindow* window = InitWindow(1024, 620);
@@ -104,7 +103,7 @@ void display(GLFWwindow* window)
 	crntTime = glfwGetTime();
 
 
-	GLfloat vertices[] = {
+	GLfloat cube[] = {
 		1.000000, - 1.000000, - 1.000000,
 		1.000000, - 1.000000, 1.000000,
 		- 1.000000, - 1.000000, 1.000000,
@@ -115,15 +114,14 @@ void display(GLFWwindow* window)
 		- 1.000000 , 1.000000, - 1.000000,
 	};
 
-	float vertices1[] = {
+	float vertices[] = {
 		-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
-		 0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f
-		 //-0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f
+		 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+		 0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f
 	};
 
-	archivo.createBuffer();
-	const GLfloat* buffer = archivo.getBuffer();
+	//archivo.createBuffer();
+	//const GLfloat* buffer = archivo.getBuffer();
 
 	unsigned int VAO, VBO;
 
@@ -131,21 +129,20 @@ void display(GLFWwindow* window)
 	glGenBuffers(1, &VBO);
 
 	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices1), vertices1, GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)12);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)12);
 
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 
 	GLuint programID =
 		LoadShaders(
-		"D:/OneDrive - Universidad Autonoma de San Luis Potosi - UASLP/Tu/UASLP/8sem/Programacion de Videojuegos/LectorOBJ"
-		,"D:/OneDrive - Universidad Autonoma de San Luis Potosi - UASLP/Tuf/UASLP/8sem/Programacion de Videojuegos/LectorOBJ");
+		"D:/OneDrive - Universidad Autonoma de San Luis Potosi - UASLP/Tuf/UASLP/8sem/Programacion de Videojuegos/LectorOBJ/vs1.glsl",
+		"D:/OneDrive - Universidad Autonoma de San Luis Potosi - UASLP/Tuf/UASLP/8sem/Programacion de Videojuegos/LectorOBJ/fs1.glsl");
 
 
 	do
@@ -153,19 +150,19 @@ void display(GLFWwindow* window)
 		initialTime = glfwGetTime();
 		
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		glUseProgram(programID);
 		glBindVertexArray(VAO);
 
-
 		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);//Directiva de dibujo, cantidad de indices, tipo de dato de indices, inicio de indices
 		glDrawArrays(GL_TRIANGLES, 0, 3);
-
-		
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
 
+
+		//FPS
 		while (true)
 		{
 			finalTime = glfwGetTime();

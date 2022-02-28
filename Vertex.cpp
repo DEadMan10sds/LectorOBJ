@@ -17,7 +17,7 @@ void Vertex::load_Vertex_info(GLfloat _x, GLfloat _y, GLfloat _z)
 
 void Vertex::showVertex_info()
 {
-	cout << "X: " << x << " || Y: " << y << " || Z: " << z << endl;
+	cout << "Id: " << index << " X: " << x << " || Y: " << y << " || Z: " << z << endl;
 }
 
 GLfloat Vertex::returnX()

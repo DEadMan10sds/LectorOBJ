@@ -28,7 +28,7 @@ int resX = 1024, resY = 620;
 int frameCount = 0;
 double initialTime, finalTime, actual_frame_duration; // tiempo inicial, tiempo final, contador de frames
 double frame_duration = (1 / (float)FPS);
-File archivo("perfect_cube.obj");
+File archivo("sphere.obj");
 
 using namespace std;
 using namespace glm;
@@ -41,11 +41,12 @@ void createMatrices();
 
 int main()
 {
-	//archivo.show_text_data();
+	
 
 	GLFWwindow* window = InitWindow(resX, resY);
 	if (archivo.loadFile())
 	{
+		//archivo.show_text_data();
 		if (window)
 			display(window);
 	}
@@ -131,35 +132,35 @@ void display(GLFWwindow* window)
 
 	archivo.createBuffer();
 	GLfloat* buffer = new GLfloat[archivo.returnBufferSize()];
-	for (int i = 0; i < archivo.returnLenght(); i++)
+	for (int i = 0; i < archivo.returnBufferSize(); i++)
 	{
 		buffer[i] = archivo.getBufferData(i);
 	}
 
 	const GLfloat* vertices = buffer;
-
-	int tam = archivo.returnBufferSize() * 4;
+	
 
 	GLuint VAO, VBO;
 
 	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-
 	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
+	int tam = archivo.returnBufferSize() * 4;
+	GLint vertexbuffer;
+	glGenBuffers(1, &VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, tam, vertices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), (void*)0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), (void*)(sizeof(GLfloat)*3));
-
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, (void*)0);
 	glEnableVertexAttribArray(0);
+
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), (void*)(sizeof(GLfloat)*3));
 	glEnableVertexAttribArray(1);
 
 	GLuint programID =
 		LoadShaders(
-		"D:/OneDrive - Universidad Autonoma de San Luis Potosi - UASLP/Tuf/UASLP/8sem/Programacion de Videojuegos/LectorOBJ/vs1.glsl",
-		"D:/OneDrive - Universidad Autonoma de San Luis Potosi - UASLP/Tuf/UASLP/8sem/Programacion de Videojuegos/LectorOBJ/fs1.glsl");
+		"D:/OneDrive - Universidad Autonoma de San Luis Potosi - UASLP/Tuf/UASLP/8sem/Programacion de Videojuegos/LectorOBJ/vs_basico.glsl",
+		"D:/OneDrive - Universidad Autonoma de San Luis Potosi - UASLP/Tuf/UASLP/8sem/Programacion de Videojuegos/LectorOBJ/fs_basico.glsl");
 
 
 	do
@@ -191,7 +192,7 @@ void display(GLFWwindow* window)
 		glBindVertexArray(VAO);
 
 		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);//Directiva de dibujo, cantidad de indices, tipo de dato de indices, inicio de indices
-		glDrawArrays(GL_TRIANGLES, 0, archivo.returnFaceaAmount()*3);
+		glDrawArrays(GL_TRIANGLES, 0, (archivo.returnFaceaAmount() * 3));
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -210,9 +211,8 @@ void display(GLFWwindow* window)
 		timeDiff = endtime - crntTime;
 		if (timeDiff >= 1.0)
 		{
-			//system("cls");
+			system("cls");
 			cout << "FPS: " << counter << endl;
-			cout << "Vertices a cargar: " << archivo.returnLenght() << endl;
 			crntTime = glfwGetTime();
 			counter = 0;
 		}
@@ -232,7 +232,7 @@ void createMatrices()
 	translate(model, vec3(0.0f, 0.0f, 0.0f));
 
 	//Vista
-	vec3 eye(0.0f, 0.0f, 50.0f);
+	vec3 eye(-2.0f, 1.0f, 5.0f);
 	vec3 center(0.0f, 0.0f, 0.0f);
 	vec3 up(0.0f, 1.0f, 0.0f);
 	view = lookAt(eye, center, up);

@@ -55,5 +55,7 @@
     <None Include="vs1.glsl">
       <Filter>Archivos de recursos</Filter>
     </None>
+    <None Include="fs_basico.glsl" />
+    <None Include="vs_basico.glsl" />
   </ItemGroup>
 </Project>

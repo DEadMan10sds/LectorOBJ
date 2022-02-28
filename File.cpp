@@ -109,7 +109,8 @@ void File::createBuffer()
 	buffer_size = faces_amount * 3 * 6;
 	int color = 0;
 	list_Buffer_data.clear();
-	for (vector<Object>::iterator object_itr = list_object.begin(); object_itr != list_object.end(); (++object_itr))
+	vector<Object>::iterator object_itr;
+	for (object_itr = list_object.begin(); object_itr != list_object.end(); (++object_itr))
 	{
 		vector<Face> objectFaces = object_itr->returnFaceList();
 		for (vector<Face>::iterator face_itr = objectFaces.begin(); face_itr != objectFaces.end(); (++face_itr))
@@ -119,7 +120,6 @@ void File::createBuffer()
 			{
 				vector<Vertex>::iterator index_vertices = list_vertices.begin();
 				advance(index_vertices, (*index_face_list) - 1);
-				index_vertices->showVertex_info();
 				Vertex vertice_aux = *index_vertices;
 				list_Buffer_data.push_back(vertice_aux.returnX());
 				list_Buffer_data.push_back(vertice_aux.returnY());
@@ -142,6 +142,21 @@ void File::createBuffer()
 			}
 
 		}
+
+		/*int k = 0;
+		for (int i = 0; i < list_Buffer_data.size(); i++)
+		{
+			if (k < 6)
+			{
+				cout << " - " << list_Buffer_data[i];
+				k++;
+			}
+			if (k >= 6)
+			{
+				k = 0;
+				cout << endl;
+			}
+ 	}*/
 
 		/*GLfloat* aux;
 		buffer_size = list_Buffer_data.size();

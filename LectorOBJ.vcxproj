@@ -174,7 +174,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="fs1.glsl" />
+    <None Include="fs_basico.glsl" />
     <None Include="vs1.glsl" />
+    <None Include="vs_basico.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

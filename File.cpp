@@ -1,13 +1,15 @@
 #include "File.h"
 
-File::File(string _name)
+File::File(string _name)//Constructor
 {
 	file_name = _name;
 }
 
+//Cargar achivos
 bool File::loadFile()
 {
 	int number_Vertices = 0, number_face = 0, number_Objects = 0;
+	int normals = 0;
 	float x, y, z;
 	ifstream NEWFILE;
 	string line;
@@ -25,19 +27,27 @@ bool File::loadFile()
 			}
 			if (line[0] == 'f')
 			{
+				int aux = 1;
 				int new_face_vertex_index;
 				number_face++;
-				line.erase(0, 2);
 				Face new_face(number_face);
+				line.erase(0, 2);
+				for (int i = 0; i < line.length(); i++)
+					if (line[i] == '/') 
+						line[i] = ' ';
+
 				stringstream face_vertices(line);
 				while (face_vertices >> new_face_vertex_index)
 				{
-					new_face.addVertex(new_face_vertex_index);
+					if (!aux % 2)new_face.addVertex(new_face_vertex_index);
+					else new_face.addNormal(new_face_vertex_index);
+					aux++;
 				}
 				itr_object = --list_object.end();
 				itr_object->addFace(new_face);
+				//itr_object = list_object.end();
 			}
-			if (line[0] == 'v')
+			if (line[0] == 'v' && line[1] != 'n')
 			{
 				number_Vertices++;
 				line.erase(0, 2);
@@ -49,6 +59,20 @@ bool File::loadFile()
 				list_vertices.push_back(new_vertex);
 				itr_object = --list_object.end();
 				itr_object->addVertex(number_Vertices);
+				//itr_object = list_object.end();
+			}
+			if (line[0] == 'v' && line[1] == 'n')
+			{
+				line.erase(0, 3);
+				normals++;
+				Vertex aux_normal(normals);
+				stringstream normal_aux;
+				normal_aux << line;
+				normal_aux >> x >> y >> z;
+				aux_normal.load_Vertex_info(x, y, z);
+				list_normal.push_back(aux_normal);
+				itr_object = --list_object.end();
+				itr_object->addNormal(normals);
 			}
 		}
 	}
@@ -63,6 +87,7 @@ bool File::loadFile()
 	return true;
 }
 
+//Muestra el TXT del archivo
 void File::show_text_data()
 {
 	for (vector<Object>::iterator for_itr = list_object.begin(); for_itr != list_object.end(); (++for_itr))
@@ -73,18 +98,18 @@ void File::show_text_data()
 	}
 }
 
-void File::show_vertex_data()
+void File::show_vertex_data()//Muestra la información de cada vértice
 {
 	for (vector<Vertex>::iterator itr_vertex_list = list_vertices.begin(); itr_vertex_list != list_vertices.end(); (++itr_vertex_list))
 		itr_vertex_list->showVertex_info();
 }
 
-void File::show_specific_vertex_data(int _index)
+void File::show_specific_vertex_data(int _index)//Info de un vértice en específico
 {
 	list_vertices[--_index].showVertex_info();
 }
 
-int File::returnLenght()
+int File::returnLenght()//Longitud de la lista de vértices
 {
 	return list_vertices.size();
 }
@@ -104,26 +129,30 @@ GLfloat File::return_ZVertexList(int index)
 	return list_vertices[index].returnZ();
 }
 
+//GENERA EL ARRAY CON LOS DATOS EN ORDEN
 void File::createBuffer()
 {
 	buffer_size = faces_amount * 3 * 6;
 	int color = 0;
 	list_Buffer_data.clear();
 	vector<Object>::iterator object_itr;
-	for (object_itr = list_object.begin(); object_itr != list_object.end(); (++object_itr))
+	for (object_itr = list_object.begin(); object_itr != list_object.end(); (++object_itr))//Recorre cada objeto
 	{
 		vector<Face> objectFaces = object_itr->returnFaceList();
-		for (vector<Face>::iterator face_itr = objectFaces.begin(); face_itr != objectFaces.end(); (++face_itr))
+		for (vector<Face>::iterator face_itr = objectFaces.begin(); face_itr != objectFaces.end(); (++face_itr))//Recorre las caras del objeto
 		{
 			vector<int> vertices_face = face_itr->returnVertexList();
-			for (vector<int>::iterator index_face_list = vertices_face.begin(); index_face_list != vertices_face.end(); (++index_face_list))
+			for (vector<int>::iterator index_face_list = vertices_face.begin(); index_face_list != vertices_face.end(); (++index_face_list))//Recorre los vértices de la cara del objeto
 			{
-				vector<Vertex>::iterator index_vertices = list_vertices.begin();
-				advance(index_vertices, (*index_face_list) - 1);
+				vector<Vertex>::iterator index_vertices = list_vertices.begin();//Asigna un iterador al inicio de la lista de vértices
+				advance(index_vertices, (*index_face_list) - 1);//Mueve el iterador hasta el vértice
 				Vertex vertice_aux = *index_vertices;
-				list_Buffer_data.push_back(vertice_aux.returnX());
+				list_Buffer_data.push_back(vertice_aux.returnX());//Guarda todos los valores de coordenadas
 				list_Buffer_data.push_back(vertice_aux.returnY());
 				list_Buffer_data.push_back(vertice_aux.returnZ());
+				//Define el color 1 x 1, 
+
+				//EDITAR PARA QUE CARGUE LAS NORMALES
 				if (color == 0)
 					list_Buffer_data.push_back(1);
 				else
@@ -142,67 +171,7 @@ void File::createBuffer()
 			}
 
 		}
-
-		/*int k = 0;
-		for (int i = 0; i < list_Buffer_data.size(); i++)
-		{
-			if (k < 6)
-			{
-				cout << " - " << list_Buffer_data[i];
-				k++;
-			}
-			if (k >= 6)
-			{
-				k = 0;
-				cout << endl;
-			}
- 	}*/
-
-		/*GLfloat* aux;
-		buffer_size = list_Buffer_data.size();
-		int j = 0;
-		aux = new GLfloat[buffer_size];
-		for (int i = 0; i < list_Buffer_data.size(); i++)
-		{
-			if (aux)
-			{
-				aux[i] = list_Buffer_data[i];
-			}
-		}
-		buffer = aux;*/
 	}
-
-	//int j = 0;
-	//GLfloat* aux;
-	//int size = list_vertices.size() * 3 * 2;
-	//aux = new GLfloat[size];
-
-	//for (int i = 0; i < list_vertices.size(); i++)
-	//{
-	//	if (aux)
-	//	{
-	//		aux[j] = list_vertices[i].returnX() / 2;
-	//		j++;
-	//		aux[j] = list_vertices[i].returnY() / 2;
-	//		j++;
-	//		aux[j] = list_vertices[i].returnZ() / 2;
-	//		j++;
-	//		aux[j] = 1.0f;
-	//		j++;
-	//		aux[j] = 1.0f;
-	//		j++;
-	//		aux[j] = 1.0f;
-	//		j++;
-	//		//cout << "X: " << list_vertices[i].returnX() << "Y: " << list_vertices[i].returnY() << "Z: " << list_vertices[i].returnZ() << endl;
-	//	}
-	//}
-
-	//buffer = aux;
-
-	//for (int i = 0; i < size; i++)
-	//{
-	//	cout << "V: " << aux[i] << endl;
-	//}
 }
 
 GLfloat* File::getBuffer()

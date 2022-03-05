@@ -44,3 +44,8 @@ vector<Face> Object::returnFaceList()
 {
 	return list_faces;
 }
+
+void Object::addNormal(int normal)
+{
+	list_normals.push_back(normal);
+}

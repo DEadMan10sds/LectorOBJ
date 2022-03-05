@@ -28,3 +28,8 @@ vector<int> Face::returnVertexList()
 {
 	return list_vertices_face;
 }
+
+void Face::addNormal(int _normal)
+{
+	list_vertices_face.push_back(_normal);
+}

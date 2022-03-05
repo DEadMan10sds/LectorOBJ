@@ -26,15 +26,17 @@
 //GLOBALES
 int resX = 1024, resY = 620;
 int frameCount = 0;
-double initialTime, finalTime, actual_frame_duration; // tiempo inicial, tiempo final, contador de frames
+double initialTime, finalTime, actual_frame_duration; //Tiempo inicial, tiempo final, contador de frames
 double frame_duration = (1 / (float)FPS);
-File archivo("sphere.obj");
+File archivo("untitled.obj");
 
+//Namespace 
 using namespace std;
 using namespace glm;
 
 mat4 model, view, projection;
 
+//Funciones
 GLFWwindow* InitWindow(const int resX, const int resY);
 void display(GLFWwindow* window);
 void createMatrices();
@@ -42,11 +44,11 @@ void createMatrices();
 int main()
 {
 	
-
+	//Crea ventana
 	GLFWwindow* window = InitWindow(resX, resY);
-	if (archivo.loadFile())
+	if (archivo.loadFile())//Verifica que se cargue el archivo
 	{
-		//archivo.show_text_data();
+		//archivo.show_text_data();//Merstra txt del archivo
 		if (window)
 			display(window);
 	}
@@ -97,22 +99,19 @@ GLFWwindow* InitWindow(const int resX, const int resY)
 	glEnable(GL_DEPTH_TEST);
 
 	// Get info of GPU and supported OpenGL version
-	printf("Renderer: %s\n", glGetString(GL_RENDERER));
-	printf("OpenGL version supported %s\n", glGetString(GL_VERSION));
-
 	return window;
 }
 
 void display(GLFWwindow* window)
 {
-
+	//Vriables locales del FPS
 	double endtime = 0, crntTime = 0, timeDiff;
 	unsigned int counter = 0;
 	double local_current_time = 0, local_timeDiff = 0;
-	
-	crntTime = glfwGetTime();
 
+	crntTime = glfwGetTime();//Obtiene el tiempo actual segun opengl
 
+	//Objetos de prueba
 	GLfloat cube[] = {
 		1.000000, -1.000000, -1.000000, 1.0f, 0.0f, 0.0f,
 		1.000000, -1.000000,  1.000000, 1.0f, 0.0f, 1.0f,
@@ -130,15 +129,16 @@ void display(GLFWwindow* window)
 		 0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
 	};
 
-	archivo.createBuffer();
-	GLfloat* buffer = new GLfloat[archivo.returnBufferSize()];
-	for (int i = 0; i < archivo.returnBufferSize(); i++)
+
+	archivo.createBuffer();//Manda llamar al metodo que almacena toda la informacion en un vector
+	GLfloat* buffer = new GLfloat[archivo.returnBufferSize()];//Crea un arreglo fe GLfloat dinamico segun el tamaño del buffer
+	for (int i = 0; i < archivo.returnBufferSize(); i++)//Copia el buffer de la clase File al arreglo dinamico
 	{
 		buffer[i] = archivo.getBufferData(i);
 	}
 
-	const GLfloat* vertices = buffer;
-	
+	const GLfloat* vertices = buffer;//Asigna a otra variable
+
 
 	GLuint VAO, VBO;
 
@@ -154,22 +154,20 @@ void display(GLFWwindow* window)
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, (void*)0);
 	glEnableVertexAttribArray(0);
 
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(GLfloat), (void*)(sizeof(GLfloat)*3));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 3));
 	glEnableVertexAttribArray(1);
 
-	GLuint programID =
-		LoadShaders(
-		"D:/OneDrive - Universidad Autonoma de San Luis Potosi - UASLP/Tuf/UASLP/8sem/Programacion de Videojuegos/LectorOBJ/vs_basico.glsl",
-		"D:/OneDrive - Universidad Autonoma de San Luis Potosi - UASLP/Tuf/UASLP/8sem/Programacion de Videojuegos/LectorOBJ/fs_basico.glsl");
+	//Cargan los shaders
+	GLuint programID = LoadShaders( "vs1.glsl", "fs1.glsl");
 
 
 	do
 	{
-		initialTime = glfwGetTime();
+		initialTime = glfwGetTime();//Tiempo inicial del frame
 		
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glUseProgram(programID);
+		glUseProgram(programID);//Cargan los shaders
 
 		//VARIABLES UNIFORMES
 
@@ -180,7 +178,8 @@ void display(GLFWwindow* window)
 		/*int idFactorAmb = glGetUniformLocation(programID, "factorAmbiental");
 		glUniform1f(idFactorAmb, 1.0f);*/
 
-		createMatrices();
+		createMatrices();//Crea las matrices
+		//CARGA LAS MATRICES EN LOS SHADERS
 		int modelLoc = glGetUniformLocation(programID, "model");
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
 		modelLoc = glGetUniformLocation(programID, "view");
@@ -200,7 +199,7 @@ void display(GLFWwindow* window)
 
 
 		//FPS
-		while (true)
+		while (true)//Si duran mas que lo indicado
 		{
 			finalTime = glfwGetTime();
 			if ((finalTime - initialTime) >= frame_duration) break;
@@ -212,6 +211,8 @@ void display(GLFWwindow* window)
 		if (timeDiff >= 1.0)
 		{
 			system("cls");
+			printf("Renderer: %s\n", glGetString(GL_RENDERER));
+			printf("OpenGL version supported %s\n", glGetString(GL_VERSION));
 			cout << "FPS: " << counter << endl;
 			crntTime = glfwGetTime();
 			counter = 0;
@@ -225,18 +226,25 @@ void display(GLFWwindow* window)
 	
 }
 
+float anglulo = 0.0f;
 void createMatrices()
 {
 	//Modelo
-	model = mat4(1);
-	translate(model, vec3(0.0f, 0.0f, 0.0f));
+	model = mat4(1);//Inicia la matriz modelo con puro 1
+	//model = translate(model, vec3(0.0f, 0.0f, 0.0f));
+	model = rotate(model, radians(anglulo), vec3(0.0f, 0.1f, 0.0f));//Hace la rotación de la matriz modelo, en radianes, segun el eje
+	//model = translate(model, vec3(-1.0f, 0.0f, 0.0f));
+	if (anglulo >= 361) anglulo = 0;
+	else anglulo += 1;
 
 	//Vista
-	vec3 eye(-2.0f, 1.0f, 5.0f);
-	vec3 center(0.0f, 0.0f, 0.0f);
-	vec3 up(0.0f, 1.0f, 0.0f);
-	view = lookAt(eye, center, up);
+	vec3 eye(-2.0f, 2.0f, 7.0f);//EJE DE LA POSICIÓN DE LA CAMARA
+	vec3 center(0.0f, 0.0f, 0.0f);//A DONDE APUNTA LA CAMARA
+	vec3 up(0.0f, 1.0f, 0.0f);//VALOR DE NORMAL DE LA CAMARA
+	view = lookAt(eye, center, up);//Estable el ambiente
 
 	//Proyección
-	projection = perspective(radians(45.0f), (float)(resX / resY), 0.1f, 100.0f);
+	projection = perspective(radians(45.0f), (float)(resX / resY), 0.1f, 100.0f);//Ángulo de visión
+	
+	
 }

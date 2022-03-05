@@ -15,9 +15,10 @@ class Object
 		string object_name;
 		vector<int> list_vertices;
 		vector<int>::iterator itr_vertices;
+		vector<int> list_normals;
+		vector<int>::iterator itr_normals;
 		vector<Face> list_faces;
 		vector<Face>::iterator itr_faces;
-
 	public:
 		Object(string _name);
 		string getObjectName();
@@ -26,5 +27,6 @@ class Object
 		void addFace(Face _face);
 		void showFacesList();
 		vector<Face> returnFaceList();
+		void addNormal(int normal);
 };
 

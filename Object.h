@@ -28,5 +28,6 @@ class Object
 		void showFacesList();
 		vector<Face> returnFaceList();
 		void addNormal(int normal);
+		void showNormalList(vector<Vertex> global_list_normals);
 };
 

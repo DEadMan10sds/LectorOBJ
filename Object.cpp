@@ -49,3 +49,15 @@ void Object::addNormal(int normal)
 {
 	list_normals.push_back(normal);
 }
+
+void Object::showNormalList(vector<Vertex> global_list_normals)
+{
+	cout << "LISTA GLOBAL DE NORMALES" << endl;
+	for (vector<int>::iterator itr_object_face_list = list_normals.begin(); itr_object_face_list != list_normals.end(); (++itr_object_face_list))
+	{
+		//cout << "Vertice: " << *itr_text_vertices << endl;
+		//file_vertex_list[--(*itr_text_vertices)].showVertex_info();
+		cout << "Normal: " << *itr_object_face_list << endl;
+		global_list_normals[--(*itr_object_face_list)].showVertex_info();
+	}
+}

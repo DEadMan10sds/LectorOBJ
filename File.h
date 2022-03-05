@@ -35,6 +35,7 @@ class File
 		bool loadFile();
 		void show_text_data();
 		void show_vertex_data();
+		void show_normal_data();
 		void show_specific_vertex_data(int _index);
 		int returnLenght();
 		GLfloat return_XVertexList(int index);

@@ -11,6 +11,7 @@ bool File::loadFile()
 	int number_Vertices = 0, number_face = 0, number_Objects = 0;
 	int normals = 0;
 	float x, y, z;
+	bool flag = false;
 	ifstream NEWFILE;
 	string line;
 	NEWFILE.open(file_name.c_str(), ios::in);
@@ -35,13 +36,22 @@ bool File::loadFile()
 				for (int i = 0; i < line.length(); i++)
 					if (line[i] == '/') 
 						line[i] = ' ';
-
 				stringstream face_vertices(line);
 				while (face_vertices >> new_face_vertex_index)
 				{
-					if (!aux % 2)new_face.addVertex(new_face_vertex_index);
+					if (!flag)
+					{
+						new_face.addVertex(new_face_vertex_index);
+						flag = !flag;
+					}
+					else
+					{
+						new_face.addNormal(new_face_vertex_index);
+						flag = !flag;
+					}
+					/*if (aux % 2)new_face.addVertex(new_face_vertex_index);
 					else new_face.addNormal(new_face_vertex_index);
-					aux++;
+					aux++;*/
 				}
 				itr_object = --list_object.end();
 				itr_object->addFace(new_face);
@@ -94,6 +104,7 @@ void File::show_text_data()
 	{
 		cout << for_itr->getObjectName() << endl;
 		for_itr->showVertexList(list_vertices);
+		for_itr->showNormalList(list_normal);
 		for_itr->showFacesList();
 	}
 }
@@ -102,6 +113,12 @@ void File::show_vertex_data()//Muestra la información de cada vértice
 {
 	for (vector<Vertex>::iterator itr_vertex_list = list_vertices.begin(); itr_vertex_list != list_vertices.end(); (++itr_vertex_list))
 		itr_vertex_list->showVertex_info();
+}
+
+void File::show_normal_data()//Muestra la información de cada vértice
+{
+	for (vector<Vertex>::iterator itr_normal_list = list_normal.begin(); itr_normal_list != list_normal.end(); (++itr_normal_list))
+		itr_normal_list->showVertex_info();
 }
 
 void File::show_specific_vertex_data(int _index)//Info de un vértice en específico
@@ -132,7 +149,7 @@ GLfloat File::return_ZVertexList(int index)
 //GENERA EL ARRAY CON LOS DATOS EN ORDEN
 void File::createBuffer()
 {
-	buffer_size = faces_amount * 3 * 6;
+	buffer_size = faces_amount * 3 * 9;
 	int color = 0;
 	list_Buffer_data.clear();
 	vector<Object>::iterator object_itr;
@@ -142,14 +159,27 @@ void File::createBuffer()
 		for (vector<Face>::iterator face_itr = objectFaces.begin(); face_itr != objectFaces.end(); (++face_itr))//Recorre las caras del objeto
 		{
 			vector<int> vertices_face = face_itr->returnVertexList();
+			vector<int> normal_face = face_itr->returnNormalList();
 			for (vector<int>::iterator index_face_list = vertices_face.begin(); index_face_list != vertices_face.end(); (++index_face_list))//Recorre los vértices de la cara del objeto
 			{
+
+				//ORDEN DE BUFFER: POSICIÓN - NORMAL - COLOR
 				vector<Vertex>::iterator index_vertices = list_vertices.begin();//Asigna un iterador al inicio de la lista de vértices
 				advance(index_vertices, (*index_face_list) - 1);//Mueve el iterador hasta el vértice
 				Vertex vertice_aux = *index_vertices;
 				list_Buffer_data.push_back(vertice_aux.returnX());//Guarda todos los valores de coordenadas
 				list_Buffer_data.push_back(vertice_aux.returnY());
 				list_Buffer_data.push_back(vertice_aux.returnZ());
+
+				//Almacenamiento de las normales
+				vector<Vertex>::iterator index_normal = list_normal.begin();
+				vector<int>::iterator iterador_lista_normales = normal_face.begin();
+				advance(index_normal, (*iterador_lista_normales) - 1);
+				Vertex normal_aux = *index_normal;
+				list_Buffer_data.push_back(normal_aux.returnX());
+				list_Buffer_data.push_back(normal_aux.returnY());
+				list_Buffer_data.push_back(normal_aux.returnZ());
+
 				//Define el color 1 x 1, 
 
 				//EDITAR PARA QUE CARGUE LAS NORMALES

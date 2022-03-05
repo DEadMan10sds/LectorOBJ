@@ -28,7 +28,7 @@ int resX = 1024, resY = 620;
 int frameCount = 0;
 double initialTime, finalTime, actual_frame_duration; //Tiempo inicial, tiempo final, contador de frames
 double frame_duration = (1 / (float)FPS);
-File archivo("untitled.obj");
+File archivo("four_figsN.obj");
 
 //Namespace 
 using namespace std;
@@ -48,7 +48,7 @@ int main()
 	GLFWwindow* window = InitWindow(resX, resY);
 	if (archivo.loadFile())//Verifica que se cargue el archivo
 	{
-		//archivo.show_text_data();//Merstra txt del archivo
+		//archivo.show_text_data();//Muestra txt del archivo
 		if (window)
 			display(window);
 	}
@@ -151,16 +151,20 @@ void display(GLFWwindow* window)
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, tam, vertices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 9, (void*)0);
 	glEnableVertexAttribArray(0);
 
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 3));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 3));
 	glEnableVertexAttribArray(1);
+
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 6));
+	glEnableVertexAttribArray(2);
 
 	//Cargan los shaders
 	GLuint programID = LoadShaders( "vs1.glsl", "fs1.glsl");
 
-
+	//model = mat4(1);//Inicia la matriz modelo con puro 1
+	//model = translate(model, vec3(0.0f, 0.0f, 0.0f));
 	do
 	{
 		initialTime = glfwGetTime();//Tiempo inicial del frame
@@ -172,11 +176,11 @@ void display(GLFWwindow* window)
 		//VARIABLES UNIFORMES
 
 
-		/*int idUniform = glGetUniformLocation(programID, "colorUniform");
-		glUniform3f(idUniform, 1.0, 1.0, 1.0);*/
+		int idUniform = glGetUniformLocation(programID, "colorUniform");
+		glUniform3f(idUniform, 1.0, 1.0, 1.0);
 
-		/*int idFactorAmb = glGetUniformLocation(programID, "factorAmbiental");
-		glUniform1f(idFactorAmb, 1.0f);*/
+		int idFactorAmb = glGetUniformLocation(programID, "factorAmbiental");
+		glUniform1f(idFactorAmb, 1.0f);
 
 		createMatrices();//Crea las matrices
 		//CARGA LAS MATRICES EN LOS SHADERS
@@ -214,6 +218,7 @@ void display(GLFWwindow* window)
 			printf("Renderer: %s\n", glGetString(GL_RENDERER));
 			printf("OpenGL version supported %s\n", glGetString(GL_VERSION));
 			cout << "FPS: " << counter << endl;
+			
 			crntTime = glfwGetTime();
 			counter = 0;
 		}

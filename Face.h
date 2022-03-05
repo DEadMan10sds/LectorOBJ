@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include "Vertex.h"
 
 using namespace std;
 
@@ -18,6 +19,8 @@ class Face
 		int showFaceIndex();
 		void showFaceVertices();
 		vector<int> returnVertexList();
+		vector<int> returnNormalList();
 		void addNormal(int _normal);
+		void showNormals(vector<Vertex> global_list_normals);
 };
 

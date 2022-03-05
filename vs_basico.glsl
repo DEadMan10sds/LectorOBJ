@@ -1,7 +1,8 @@
 #version 330 core
 
 layout (location = 0) in vec3 verPos;
-layout (location = 1) in vec3 verCol;
+layout (location = 1) in vec3 verNormal;
+layout (location = 2) in vec3 verCol;
 
 uniform mat4x4 model;
 uniform mat4x4 view;

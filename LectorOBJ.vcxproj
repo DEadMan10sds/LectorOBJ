@@ -96,12 +96,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\OneDrive - Universidad Autonoma de San Luis Potosi - UASLP\Tuf\UASLP\8sem\Programacion de Videojuegos\LectorOBJ\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Usuario\Desktop\8to semestre\Programación de videojuegos\LectorOBJ\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>D:\OneDrive - Universidad Autonoma de San Luis Potosi - UASLP\Tuf\UASLP\8sem\Programacion de Videojuegos\LectorOBJ\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\Usuario\Desktop\8to semestre\Programación de videojuegos\LectorOBJ\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glew32.lib;glfw3.lib;opengl32.lib;freeglut.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -130,12 +130,12 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\OneDrive - Universidad Autonoma de San Luis Potosi - UASLP\Tuf\UASLP\8sem\Programacion de Videojuegos\LectorOBJ\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Usuario\Desktop\8to semestre\Programación de videojuegos\LectorOBJ\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>D:\OneDrive - Universidad Autonoma de San Luis Potosi - UASLP\Tuf\UASLP\8sem\Programacion de Videojuegos\LectorOBJ\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\Usuario\Desktop\8to semestre\Programación de videojuegos\LectorOBJ\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glew32.lib;glfw3.lib;opengl32.lib;freeglut.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -169,14 +169,22 @@
     <ClInclude Include="Face.h" />
     <ClInclude Include="File.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="shader.hpp" />
     <ClInclude Include="Vertex.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="flat_fs.glsl" />
+    <None Include="flat_vs.glsl" />
     <None Include="fs1.glsl" />
     <None Include="fs_basico.glsl" />
+    <None Include="Gouraud_fs.glsl" />
+    <None Include="Gouraud_vs.glsl" />
     <None Include="vs1.glsl" />
     <None Include="vs_basico.glsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="LectorOBJ.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

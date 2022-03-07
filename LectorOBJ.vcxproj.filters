@@ -47,6 +47,9 @@
     <ClInclude Include="shader.hpp">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="fs1.glsl">
@@ -57,5 +60,22 @@
     </None>
     <None Include="fs_basico.glsl" />
     <None Include="vs_basico.glsl" />
+    <None Include="Gouraud_vs.glsl">
+      <Filter>Archivos de recursos</Filter>
+    </None>
+    <None Include="Gouraud_fs.glsl">
+      <Filter>Archivos de recursos</Filter>
+    </None>
+    <None Include="flat_fs.glsl">
+      <Filter>Archivos de recursos</Filter>
+    </None>
+    <None Include="flat_vs.glsl">
+      <Filter>Archivos de recursos</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="LectorOBJ.rc">
+      <Filter>Archivos de recursos</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

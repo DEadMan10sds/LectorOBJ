@@ -28,7 +28,7 @@ int resX = 1024, resY = 620;
 int frameCount = 0;
 double initialTime, finalTime, actual_frame_duration; //Tiempo inicial, tiempo final, contador de frames
 double frame_duration = (1 / (float)FPS);
-File archivo("four_figsN.obj");
+File archivo("mono.obj");
 
 //Namespace 
 using namespace std;
@@ -161,8 +161,12 @@ void display(GLFWwindow* window)
 	glEnableVertexAttribArray(2);
 
 	//Cargan los shaders
-	GLuint programID = LoadShaders( "vs1.glsl", "fs1.glsl");
+	GLuint programIDP = LoadShaders( "vs1.glsl", "fs1.glsl"); //phong
+	GLuint programIDG = LoadShaders("Gouraud_vs.glsl", "Gouraud_fs.glsl"); //Goraud
+	GLuint programIDF = LoadShaders("flat_vs.glsl", "flat_fs.glsl"); //Goraud
 
+
+	GLuint programID = programIDG;
 	//model = mat4(1);//Inicia la matriz modelo con puro 1
 	//model = translate(model, vec3(0.0f, 0.0f, 0.0f));
 	do
@@ -170,6 +174,10 @@ void display(GLFWwindow* window)
 		initialTime = glfwGetTime();//Tiempo inicial del frame
 		
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) programID = programIDP;
+		if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) programID = programIDG;
+		if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) programID = programIDF;
 
 		glUseProgram(programID);//Cargan los shaders
 

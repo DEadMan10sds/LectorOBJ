@@ -21,8 +21,8 @@ void main()
 vec4 Light(vec3 objectColor)
 {
 	vec3 lightColor = vec3(1.0, 1.0, 1.0);
-	vec3 lightPos = vec3(0.0, 0.0, 4.0);
-	vec3 viewPos = vec3(0.0, 0.0, 4.0);
+	vec3 lightPos = vec3(0.0, 0.0, 10.0);
+	vec3 viewPos = vec3(0.0, 0.0, 10.0);
 
 	//Ambiental
 	float ambientStrenght = 0.1;

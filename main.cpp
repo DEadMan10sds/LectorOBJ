@@ -237,19 +237,17 @@ void createMatrices()
 	//Modelo
 	model = mat4(1);//Inicia la matriz modelo con puro 1
 	//model = translate(model, vec3(0.0f, 0.0f, 0.0f));
-	model = rotate(model, radians(anglulo), vec3(0.0f, 0.1f, 0.0f));//Hace la rotación de la matriz modelo, en radianes, segun el eje
+	model = rotate(model, radians(anglulo), vec3(0.0f, 1.0f, 0.0f));//Hace la rotación de la matriz modelo, en radianes, segun el eje
 	//model = translate(model, vec3(-1.0f, 0.0f, 0.0f));
 	if (anglulo >= 361) anglulo = 0;
 	else anglulo += 1;
 
 	//Vista
-	vec3 eye(-2.0f, 2.0f, 7.0f);//EJE DE LA POSICIÓN DE LA CAMARA
+	vec3 eye(-2.0f, 1.0f, 5.0f);//EJE DE LA POSICIÓN DE LA CAMARA
 	vec3 center(0.0f, 0.0f, 0.0f);//A DONDE APUNTA LA CAMARA
 	vec3 up(0.0f, 1.0f, 0.0f);//VALOR DE NORMAL DE LA CAMARA
 	view = lookAt(eye, center, up);//Estable el ambiente
 
 	//Proyección
 	projection = perspective(radians(45.0f), (float)(resX / resY), 0.1f, 100.0f);//Ángulo de visión
-	
-	
 }

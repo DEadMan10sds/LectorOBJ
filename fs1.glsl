@@ -15,7 +15,6 @@ vec4 Light(vec3 objectColor);
 void main()
 {
 	FragColorOut = Light(FragColor);
-//	FragColor = vec4(colorUniform * factorAmbiental, 1.0f);
 }
 
 vec4 Light(vec3 objectColor)

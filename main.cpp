@@ -163,10 +163,10 @@ void display(GLFWwindow* window)
 	//Cargan los shaders
 	GLuint programIDP = LoadShaders( "vs1.glsl", "fs1.glsl"); //phong
 	GLuint programIDG = LoadShaders("Gouraud_vs.glsl", "Gouraud_fs.glsl"); //Goraud
-	GLuint programIDF = LoadShaders("flat_vs.glsl", "flat_fs.glsl"); //Goraud
+	GLuint programIDF = LoadShaders("flat_vs.glsl", "flat_fs.glsl"); //flat
 
 
-	GLuint programID = programIDG;
+	GLuint programID = programIDP;
 	//model = mat4(1);//Inicia la matriz modelo con puro 1
 	//model = translate(model, vec3(0.0f, 0.0f, 0.0f));
 	do

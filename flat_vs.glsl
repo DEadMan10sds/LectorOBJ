@@ -3,12 +3,10 @@
 layout (location = 0) in vec3 pos;
 layout (location = 1) in vec3 color;
 layout (location = 2) in vec3 normal;
-layout (location = 3) in vec2 textCoord;
 
 out vec3 FragPos;
-out vec3 FragColor;
 out vec3 FragNormal;
-out vec2 FragTextCoord;
+out vec3 FragColor;
 
 flat out vec3 faceNormal;
 
@@ -24,5 +22,4 @@ void main(){
     FragNormal = normalTransformada;
     faceNormal = FragNormal;
     FragColor = color;
-    FragTextCoord = textCoord;
 }

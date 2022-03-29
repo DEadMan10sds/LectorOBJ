@@ -28,7 +28,8 @@ int resX = 1024, resY = 620;
 int frameCount = 0;
 double initialTime, finalTime, actual_frame_duration; //Tiempo inicial, tiempo final, contador de frames
 double frame_duration = (1 / (float)FPS);
-File archivo("mono.obj");
+File archivo("cube.obj");
+File esfera("sphere.obj");
 
 //Namespace 
 using namespace std;
@@ -46,12 +47,13 @@ int main()
 	
 	//Crea ventana
 	GLFWwindow* window = InitWindow(resX, resY);
-	if (archivo.loadFile())//Verifica que se cargue el archivo
-	{
-		//archivo.show_text_data();//Muestra txt del archivo
-		if (window)
-			display(window);
-	}
+	if (window)
+		display(window);
+	//if (archivo.getLoadedStatus())//Verifica que se cargue el archivo
+	//{
+	//	//archivo.show_text_data();//Muestra txt del archivo
+	//	
+	//}
 
 	glfwDestroyWindow(window);
 	glfwTerminate();
@@ -111,54 +113,41 @@ void display(GLFWwindow* window)
 
 	crntTime = glfwGetTime();//Obtiene el tiempo actual segun opengl
 
-	//Objetos de prueba
-	GLfloat cube[] = {
-		1.000000, -1.000000, -1.000000, 1.0f, 0.0f, 0.0f,
-		1.000000, -1.000000,  1.000000, 1.0f, 0.0f, 1.0f,
-	   -1.000000, -1.000000,  1.000000, 1.0f, 0.0f, 0.0f,
-	   -1.000000, -1.000000, -1.000000, 1.0f, 1.0f, 0.0f,
-		1.000000,  1.000000, -0.999999, 1.0f, 0.0f, 1.0f,
-		0.999999,  1.000000,  1.000001, 1.0f, 0.0f, 0.0f,
-	   -1.000000,  1.000000,  1.000000, 1.0f, 1.0f, 0.0f,
-	   -1.000000,  1.000000, -1.000000, 1.0f, 0.0f, 1.0f
-	};
+	//archivo.createBuffer();//Manda llamar al metodo que almacena toda la informacion en un vector
+	//GLfloat* buffer = new GLfloat[archivo.returnBufferSize()];//Crea un arreglo fe GLfloat dinamico segun el tamaño del buffer
+	//for (int i = 0; i < archivo.returnBufferSize(); i++)//Copia el buffer de la clase File al arreglo dinamico
+	//{
+	//	buffer[i] = archivo.getBufferData(i);
+	//}
 
-	float triangle2d[] = {
-		-0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-		 0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-		 0.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
-	};
+	//const GLfloat* vertices = buffer;//Asigna a otra variable
 
 
-	archivo.createBuffer();//Manda llamar al metodo que almacena toda la informacion en un vector
-	GLfloat* buffer = new GLfloat[archivo.returnBufferSize()];//Crea un arreglo fe GLfloat dinamico segun el tamaño del buffer
-	for (int i = 0; i < archivo.returnBufferSize(); i++)//Copia el buffer de la clase File al arreglo dinamico
-	{
-		buffer[i] = archivo.getBufferData(i);
-	}
+	//GLuint VAO, VBO;
 
-	const GLfloat* vertices = buffer;//Asigna a otra variable
+	//glGenVertexArrays(1, &VAO);
+	//glBindVertexArray(VAO);
 
+	//int tam = archivo.returnBufferSize() * 4;
+	//GLint vertexbuffer;
+	//glGenBuffers(1, &VBO);
+	//glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	//glBufferData(GL_ARRAY_BUFFER, tam, vertices, GL_STATIC_DRAW);
 
-	GLuint VAO, VBO;
+	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 9, (void*)0);
+	//glEnableVertexAttribArray(0);
 
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
+	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 3));
+	//glEnableVertexAttribArray(1);
 
-	int tam = archivo.returnBufferSize() * 4;
-	GLint vertexbuffer;
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, tam, vertices, GL_STATIC_DRAW);
+	//glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 6));
+	//glEnableVertexAttribArray(2);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 9, (void*)0);
-	glEnableVertexAttribArray(0);
+	//Crear lista de objetos del programa
+	vector<File> lista_objetos_programa;
+	lista_objetos_programa.push_back(archivo);
+	lista_objetos_programa.push_back(esfera);
 
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 3));
-	glEnableVertexAttribArray(1);
-
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 6));
-	glEnableVertexAttribArray(2);
 
 	//Cargan los shaders
 	GLuint programIDP = LoadShaders( "vs1.glsl", "fs1.glsl"); //phong
@@ -179,31 +168,36 @@ void display(GLFWwindow* window)
 		if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) programID = programIDG;
 		if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) programID = programIDF;
 
-		glUseProgram(programID);//Cargan los shaders
+		for (int i = 0; i < lista_objetos_programa.size(); i++)
+		{
+			cout << i << endl;
+			File Current_model = lista_objetos_programa[i];
+			glUseProgram(programID);//Cargan los shaders
 
-		//VARIABLES UNIFORMES
-
-
-		int idUniform = glGetUniformLocation(programID, "colorUniform");
-		glUniform3f(idUniform, 1.0, 1.0, 1.0);
-
-		int idFactorAmb = glGetUniformLocation(programID, "factorAmbiental");
-		glUniform1f(idFactorAmb, 1.0f);
-
-		createMatrices();//Crea las matrices
-		//CARGA LAS MATRICES EN LOS SHADERS
-		int modelLoc = glGetUniformLocation(programID, "model");
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
-		modelLoc = glGetUniformLocation(programID, "view");
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(view));
-		modelLoc = glGetUniformLocation(programID, "projection");
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(projection));
+			//VARIABLES UNIFORMES
 
 
-		glBindVertexArray(VAO);
+			int idUniform = glGetUniformLocation(programID, "colorUniform");
+			glUniform3f(idUniform, 1.0, 1.0, 1.0);
 
-		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);//Directiva de dibujo, cantidad de indices, tipo de dato de indices, inicio de indices
-		glDrawArrays(GL_TRIANGLES, 0, (archivo.returnFaceaAmount() * 3));
+			int idFactorAmb = glGetUniformLocation(programID, "factorAmbiental");
+			glUniform1f(idFactorAmb, 1.0f);
+
+			createMatrices();//Crea las matrices
+			//CARGA LAS MATRICES EN LOS SHADERS
+			int modelLoc = glGetUniformLocation(programID, "model");
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+			modelLoc = glGetUniformLocation(programID, "view");
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(view));
+			modelLoc = glGetUniformLocation(programID, "projection");
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(projection));
+
+
+			glBindVertexArray(Current_model.getVAO_VertexArrayid());
+
+			//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);//Directiva de dibujo, cantidad de indices, tipo de dato de indices, inicio de indices
+			glDrawArrays(GL_TRIANGLES, 0, (Current_model.returnFaceaAmount() * 3));
+		}
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -232,8 +226,8 @@ void display(GLFWwindow* window)
 		}
 	}while(!glfwWindowShouldClose(window));
 
-	glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);
+	/*glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);*/
 	glDeleteProgram(programID);
 
 	

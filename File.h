@@ -12,8 +12,15 @@
 #include "Object.h"
 #include "Vertex.h"
 
+#include <GLM/vec3.hpp>
+#include <GLM/vec4.hpp>
+#include <GLM/mat4x4.hpp>
+#include <GLM/gtc/matrix_transform.hpp>
+#include <GLM/gtc/type_ptr.hpp>
+
 
 using namespace std;
+using namespace glm;
 
 class File
 {
@@ -24,12 +31,26 @@ class File
 		int faces_amount;
 		vector<Object> list_object;
 		vector<Object>::iterator itr_object;
+
 		vector<Vertex> list_vertices;
 		vector<Vertex>::iterator itr_vertices;
+
 		vector<GLfloat> list_Buffer_data;
 		vector<GLfloat>::iterator itr_Buffer_data;
+
 		vector<Vertex> list_normal;
 		vector<Vertex>::iterator itr_normal;
+		bool loaded;
+
+		//Datos únicos por objeto de Opengl
+		GLint ShaderProgramid;
+		GLint VertexBufferid;
+		GLint VertexArrayid;
+		
+		mat4 ModelMatrix;
+
+
+ 
 	public: 
 		File(string _name);
 		bool loadFile();
@@ -46,5 +67,9 @@ class File
 		int returnBufferSize();
 		int returnFaceaAmount();
 		GLfloat getBufferData(int index);
+		bool getLoadedStatus();
+
+		GLint getVAO_VertexArrayid();
+		GLint getVBO_VertexBufferid();
 };
 

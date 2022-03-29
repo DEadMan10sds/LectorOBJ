@@ -3,6 +3,8 @@
 File::File(string _name)//Constructor
 {
 	file_name = _name;
+	loaded = false;
+	loadFile();
 }
 
 //Cargar achivos
@@ -85,10 +87,12 @@ bool File::loadFile()
 				itr_object->addNormal(normals);
 			}
 		}
+		loaded = true;
 	}
 	else
 	{
 		cout << "No se pudo abrir el archivo " << endl;
+		loaded = false;
 		NEWFILE.close();
 		return false;
 	}
@@ -202,6 +206,32 @@ void File::createBuffer()
 
 		}
 	}
+
+	GLuint VAO, VBO;
+
+	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
+
+	int tam = returnBufferSize() * 4;
+	GLint vertexbuffer;
+	glGenBuffers(1, &VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, tam, &list_Buffer_data[0], GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 9, (void*)0);
+	glEnableVertexAttribArray(0);
+
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 3));
+	glEnableVertexAttribArray(1);
+
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 6));
+	glEnableVertexAttribArray(2);
+
+	ModelMatrix = mat4(1.0f);
+
+	VertexBufferid = VBO;
+	VertexArrayid = VAO;
+
 }
 
 GLfloat* File::getBuffer()
@@ -222,4 +252,20 @@ int File::returnFaceaAmount()
 GLfloat File::getBufferData(int index)
 {
 	return list_Buffer_data[index];
+}
+
+
+bool File::getLoadedStatus()
+{
+	return loaded;
+}
+
+GLint File::getVAO_VertexArrayid()
+{
+	return VertexArrayid;
+}
+
+GLint File::getVBO_VertexBufferid()
+{
+	return VertexBufferid;
 }

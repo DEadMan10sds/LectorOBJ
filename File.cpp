@@ -153,6 +153,7 @@ GLfloat File::return_ZVertexList(int index)
 //GENERA EL ARRAY CON LOS DATOS EN ORDEN
 void File::createBuffer()
 {
+	
 	buffer_size = faces_amount * 3 * 9;
 	int color = 0;
 	list_Buffer_data.clear();
@@ -166,7 +167,7 @@ void File::createBuffer()
 			vector<int> normal_face = face_itr->returnNormalList();
 			for (vector<int>::iterator index_face_list = vertices_face.begin(); index_face_list != vertices_face.end(); (++index_face_list))//Recorre los vértices de la cara del objeto
 			{
-
+				
 				//ORDEN DE BUFFER: POSICIÓN - NORMAL - COLOR
 				vector<Vertex>::iterator index_vertices = list_vertices.begin();//Asigna un iterador al inicio de la lista de vértices
 				advance(index_vertices, (*index_face_list) - 1);//Mueve el iterador hasta el vértice
@@ -174,7 +175,7 @@ void File::createBuffer()
 				list_Buffer_data.push_back(vertice_aux.returnX());//Guarda todos los valores de coordenadas
 				list_Buffer_data.push_back(vertice_aux.returnY());
 				list_Buffer_data.push_back(vertice_aux.returnZ());
-
+				
 				//Almacenamiento de las normales
 				vector<Vertex>::iterator index_normal = list_normal.begin();
 				vector<int>::iterator iterador_lista_normales = normal_face.begin();
@@ -183,7 +184,6 @@ void File::createBuffer()
 				list_Buffer_data.push_back(normal_aux.returnX());
 				list_Buffer_data.push_back(normal_aux.returnY());
 				list_Buffer_data.push_back(normal_aux.returnZ());
-
 				//Define el color 1 x 1, 
 
 				//EDITAR PARA QUE CARGUE LAS NORMALES
@@ -206,32 +206,6 @@ void File::createBuffer()
 
 		}
 	}
-
-	GLuint VAO, VBO;
-
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-
-	int tam = returnBufferSize() * 4;
-	GLint vertexbuffer;
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, tam, &list_Buffer_data[0], GL_STATIC_DRAW);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 9, (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 3));
-	glEnableVertexAttribArray(1);
-
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 6));
-	glEnableVertexAttribArray(2);
-
-	ModelMatrix = mat4(1.0f);
-
-	VertexBufferid = VBO;
-	VertexArrayid = VAO;
-
 }
 
 GLfloat* File::getBuffer()
@@ -262,10 +236,42 @@ bool File::getLoadedStatus()
 
 GLint File::getVAO_VertexArrayid()
 {
-	return VertexArrayid;
+	return VAO;
 }
 
 GLint File::getVBO_VertexBufferid()
 {
-	return VertexBufferid;
+	return VBO;
+}
+
+void File::generate_VAOVBO()
+{
+	buffer = new GLfloat[returnBufferSize()];
+	for (int i = 0; i < returnBufferSize(); i++)//Copia el buffer de la clase File al arreglo dinamico
+	{
+		buffer[i] = getBufferData(i);
+	}
+
+	const GLfloat* vertices = buffer;
+
+	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
+
+	int tam = returnBufferSize() * 4;
+
+	glGenBuffers(1, &VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, tam, vertices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 9, (void*)0);
+	glEnableVertexAttribArray(0);
+
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 3));
+	glEnableVertexAttribArray(1);
+
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 6));
+	glEnableVertexAttribArray(2);
+
+	ModelMatrix = mat4(1.0f);
+	//ModelMatrix = translate(ModelMatrix, vec3(0.0, 0.0, 0.0));
 }

@@ -29,7 +29,7 @@ int frameCount = 0;
 double initialTime, finalTime, actual_frame_duration; //Tiempo inicial, tiempo final, contador de frames
 double frame_duration = (1 / (float)FPS);
 File archivo("cube.obj");
-File esfera("sphere.obj");
+File esfera("mono.obj");
 
 //Namespace 
 using namespace std;
@@ -47,6 +47,7 @@ int main()
 	
 	//Crea ventana
 	GLFWwindow* window = InitWindow(resX, resY);
+	archivo.show_text_data();
 	if (window)
 		display(window);
 	//if (archivo.getLoadedStatus())//Verifica que se cargue el archivo
@@ -147,6 +148,12 @@ void display(GLFWwindow* window)
 	vector<File> lista_objetos_programa;
 	lista_objetos_programa.push_back(archivo);
 	lista_objetos_programa.push_back(esfera);
+	cout << "Lista de objetos creada" << endl;
+	for (int i = 0; i < lista_objetos_programa.size(); i++)
+	{
+		lista_objetos_programa[i].createBuffer();
+		cout << "Buffer: " << i << " Creado" << endl;
+	}
 
 
 	//Cargan los shaders
@@ -170,7 +177,7 @@ void display(GLFWwindow* window)
 
 		for (int i = 0; i < lista_objetos_programa.size(); i++)
 		{
-			cout << i << endl;
+			lista_objetos_programa[i].generate_VAOVBO();
 			File Current_model = lista_objetos_programa[i];
 			glUseProgram(programID);//Cargan los shaders
 
@@ -197,10 +204,12 @@ void display(GLFWwindow* window)
 
 			//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);//Directiva de dibujo, cantidad de indices, tipo de dato de indices, inicio de indices
 			glDrawArrays(GL_TRIANGLES, 0, (Current_model.returnFaceaAmount() * 3));
+		
+			glfwSwapBuffers(window);
+			glfwPollEvents();
 		}
 
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+		
 
 
 

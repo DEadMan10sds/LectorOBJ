@@ -44,8 +44,7 @@ class File
 
 		//Datos únicos por objeto de Opengl
 		GLint ShaderProgramid;
-		GLint VertexBufferid;
-		GLint VertexArrayid;
+		GLuint VAO, VBO;
 		
 		mat4 ModelMatrix;
 
@@ -71,5 +70,7 @@ class File
 
 		GLint getVAO_VertexArrayid();
 		GLint getVBO_VertexBufferid();
+
+		void generate_VAOVBO();
 };
 

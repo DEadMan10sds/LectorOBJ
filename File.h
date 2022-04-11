@@ -72,5 +72,9 @@ class File
 		GLint getVBO_VertexBufferid();
 
 		void generate_VAOVBO();
+
+		mat4 getModelMatrix();
+
+		void freeBufferShaders();
 };
 

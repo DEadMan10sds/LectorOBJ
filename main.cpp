@@ -6,6 +6,7 @@
 #include <vector>
 #include <iterator>
 #include <iostream>
+#include <math.h>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -23,6 +24,10 @@
 //CONSTANTES
 #define FPS 60 //FPS máximos
 
+//Namespaces
+using namespace std;
+using namespace glm;
+
 //GLOBALES
 int resX = 1024, resY = 620;
 int frameCount = 0;
@@ -30,17 +35,30 @@ double initialTime, finalTime, actual_frame_duration; //Tiempo inicial, tiempo f
 double frame_duration = (1 / (float)FPS);
 File archivo("cube.obj");
 File esfera("mono.obj");
+File plano("plane.obj");
 
-//Namespace 
-using namespace std;
-using namespace glm;
+vector<double>Xlist;
+vector<double>Ylist;
 
-mat4 model, view, projection;
+//Variables locales de matrices
+mat4 view, projection;
+
+//Variables globales para rotaciones de cámara
+GLfloat RotX = 0.0f, RotY = 0.0f;
+double deltaX, deltaY;
+double initialX = 0, initialY = 0, finalX = 1024, finalY = 620;
+bool initial = true;
+
 
 //Funciones
 GLFWwindow* InitWindow(const int resX, const int resY);
 void display(GLFWwindow* window);
+void processInput(GLFWwindow* window);
 void createMatrices();
+mat4 FPView(vec3 pos, float rotX, float rotY);
+void getValuesX();
+
+static void cursorPositionCallback(GLFWwindow* window, double xPos, double yPos);
 
 int main()
 {
@@ -84,9 +102,10 @@ GLFWwindow* InitWindow(const int resX, const int resY)
 		return NULL;
 	}
 
+
 	glfwMakeContextCurrent(window);
 	glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-
+	glfwSetCursorPosCallback(window, cursorPositionCallback);
 
 	//Glew
 	glewExperimental = true;
@@ -96,6 +115,8 @@ GLFWwindow* InitWindow(const int resX, const int resY)
 		glfwTerminate();
 	}
 
+
+	
 	//OpenGl
 	glClearColor(0.1f, 0.0f, 0.2f, 0.0f);
 	//glViewport(0, 0, 1000, 1000);
@@ -114,47 +135,17 @@ void display(GLFWwindow* window)
 
 	crntTime = glfwGetTime();//Obtiene el tiempo actual segun opengl
 
-	//archivo.createBuffer();//Manda llamar al metodo que almacena toda la informacion en un vector
-	//GLfloat* buffer = new GLfloat[archivo.returnBufferSize()];//Crea un arreglo fe GLfloat dinamico segun el tamaño del buffer
-	//for (int i = 0; i < archivo.returnBufferSize(); i++)//Copia el buffer de la clase File al arreglo dinamico
-	//{
-	//	buffer[i] = archivo.getBufferData(i);
-	//}
-
-	//const GLfloat* vertices = buffer;//Asigna a otra variable
-
-
-	//GLuint VAO, VBO;
-
-	//glGenVertexArrays(1, &VAO);
-	//glBindVertexArray(VAO);
-
-	//int tam = archivo.returnBufferSize() * 4;
-	//GLint vertexbuffer;
-	//glGenBuffers(1, &VBO);
-	//glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	//glBufferData(GL_ARRAY_BUFFER, tam, vertices, GL_STATIC_DRAW);
-
-	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 9, (void*)0);
-	//glEnableVertexAttribArray(0);
-
-	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 3));
-	//glEnableVertexAttribArray(1);
-
-	//glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 6));
-	//glEnableVertexAttribArray(2);
-
 	//Crear lista de objetos del programa
 	vector<File> lista_objetos_programa;
 	lista_objetos_programa.push_back(archivo);
 	lista_objetos_programa.push_back(esfera);
+	lista_objetos_programa.push_back(plano);
 	cout << "Lista de objetos creada" << endl;
 	for (int i = 0; i < lista_objetos_programa.size(); i++)
 	{
 		lista_objetos_programa[i].createBuffer();
 		cout << "Buffer: " << i << " Creado" << endl;
 	}
-
 
 	//Cargan los shaders
 	GLuint programIDP = LoadShaders( "vs1.glsl", "fs1.glsl"); //phong
@@ -163,8 +154,6 @@ void display(GLFWwindow* window)
 
 
 	GLuint programID = programIDP;
-	//model = mat4(1);//Inicia la matriz modelo con puro 1
-	//model = translate(model, vec3(0.0f, 0.0f, 0.0f));
 	do
 	{
 		initialTime = glfwGetTime();//Tiempo inicial del frame
@@ -175,6 +164,8 @@ void display(GLFWwindow* window)
 		if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) programID = programIDG;
 		if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) programID = programIDF;
 
+		processInput(window);
+
 		for (int i = 0; i < lista_objetos_programa.size(); i++)
 		{
 			lista_objetos_programa[i].generate_VAOVBO();
@@ -182,7 +173,7 @@ void display(GLFWwindow* window)
 			glUseProgram(programID);//Cargan los shaders
 
 			//VARIABLES UNIFORMES
-
+			//Solo quedan dentro del ciclo for (al igual que los shaders) si se van a cambiar dependiendo del objeto
 
 			int idUniform = glGetUniformLocation(programID, "colorUniform");
 			glUniform3f(idUniform, 1.0, 1.0, 1.0);
@@ -193,7 +184,7 @@ void display(GLFWwindow* window)
 			createMatrices();//Crea las matrices
 			//CARGA LAS MATRICES EN LOS SHADERS
 			int modelLoc = glGetUniformLocation(programID, "model");
-			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(model));
+			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(Current_model.getModelMatrix()));
 			modelLoc = glGetUniformLocation(programID, "view");
 			glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(view));
 			modelLoc = glGetUniformLocation(programID, "projection");
@@ -204,14 +195,10 @@ void display(GLFWwindow* window)
 
 			//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);//Directiva de dibujo, cantidad de indices, tipo de dato de indices, inicio de indices
 			glDrawArrays(GL_TRIANGLES, 0, (Current_model.returnFaceaAmount() * 3));
-		
-			glfwSwapBuffers(window);
-			glfwPollEvents();
 		}
+		glfwSwapBuffers(window);
 
-		
-
-
+		glfwPollEvents();
 
 		//FPS
 		while (true)//Si duran mas que lo indicado
@@ -235,30 +222,60 @@ void display(GLFWwindow* window)
 		}
 	}while(!glfwWindowShouldClose(window));
 
-	/*glDeleteVertexArrays(1, &VAO);
-	glDeleteBuffers(1, &VBO);*/
-	glDeleteProgram(programID);
+	//Ciclo para liberar la memoria de los objetos
+	for (int i = 0; i < lista_objetos_programa.size(); i++)
+		lista_objetos_programa[i].freeBufferShaders();
+	glDeleteProgram(programID);//Si se usan más shaders o shaders distintos por cada prograna se tiene que incluir en el método freeBufferShaders()
 
 	
 }
 
-float anglulo = 0.0f;
+
+void processInput(GLFWwindow* window)
+{
+
+	//Los controles se invierten, el sumar es abajo en lugar de arriba
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) RotX += 0.1f;
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) RotX -= 0.1f;
+}
+
 void createMatrices()
 {
-	//Modelo
-	model = mat4(1);//Inicia la matriz modelo con puro 1
-	//model = translate(model, vec3(0.0f, 0.0f, 0.0f));
-	model = rotate(model, radians(anglulo), vec3(0.0f, 1.0f, 0.0f));//Hace la rotación de la matriz modelo, en radianes, segun el eje
-	//model = translate(model, vec3(-1.0f, 0.0f, 0.0f));
-	if (anglulo >= 361) anglulo = 0;
-	else anglulo += 1;
-
 	//Vista
-	vec3 eye(-2.0f, 1.0f, 5.0f);//EJE DE LA POSICIÓN DE LA CAMARA
-	vec3 center(0.0f, 0.0f, 0.0f);//A DONDE APUNTA LA CAMARA
-	vec3 up(0.0f, 1.0f, 0.0f);//VALOR DE NORMAL DE LA CAMARA
-	view = lookAt(eye, center, up);//Estable el ambiente
+	view = FPView(vec3(0.0f, -0.5f, -7.0f), RotX, RotY);
 
 	//Proyección
 	projection = perspective(radians(45.0f), (float)(resX / resY), 0.1f, 100.0f);//Ángulo de visión
+}
+
+
+//Ángulos en RADIANES
+mat4 FPView(vec3 pos, float rotX, float rotY)
+{
+	mat4 view;
+	rotX = radians(rotX);
+	rotY = radians(rotY);
+
+
+	//Rotacion en X
+	view = rotate(mat4(1.0f), rotX, vec3(1.0f, 0.0f, 0.0f));
+
+	//Rotacion en Y
+	view = rotate(view, rotY, vec3(0.0f, 1.0f, 0.0f));
+
+
+
+
+	//Traslacion
+	view = translate(view, pos);
+
+	return view;
+}
+
+static void cursorPositionCallback(GLFWwindow* window, double xPos, double yPos)
+{
+	
+	Xlist.push_back(xPos);
+	Ylist.push_back(yPos);
+
 }

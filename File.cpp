@@ -203,7 +203,6 @@ void File::createBuffer()
 				if (color == 3)
 					color = 0;
 			}
-
 		}
 	}
 }
@@ -274,4 +273,16 @@ void File::generate_VAOVBO()
 
 	ModelMatrix = mat4(1.0f);
 	//ModelMatrix = translate(ModelMatrix, vec3(0.0, 0.0, 0.0));
+}
+
+mat4 File::getModelMatrix()
+{
+	return ModelMatrix;
+}
+
+void File::freeBufferShaders()
+{
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	/*glDeleteProgram(programID);*/
 }

@@ -16,6 +16,7 @@
 #include <GLM/mat4x4.hpp>
 #include <GLM/gtc/matrix_transform.hpp>
 #include <GLM/gtc/type_ptr.hpp>
+#include <GLM/gtx/string_cast.hpp>
 
 #include "File.h"
 #include "Vertex.h"
@@ -40,9 +41,6 @@ File plano("plane.obj");
 
 float sensitivity = .5f;
 
-vector<double>Xlist;
-vector<double>Ylist;
-
 //Variables locales de matrices
 mat4 view, projection;
 
@@ -51,16 +49,18 @@ GLfloat RotX = 0.0f, RotY = 0.0f;
 double finY, finX;
 double yaw_, yaw2, pitch_;
 float mouseSpeed = 1.0f;
-bool rotright = false, rotleft = false;
-bool rotUp = false, rotDown = false;
+vec3 mov(0.0f, -0.5f, -7.0f);
+vec3 forward_, sides_;
+float speed = .1f;
+bool straight, back, right, left;
 
 
 //Funciones
 GLFWwindow* InitWindow(const int resX, const int resY);
 void display(GLFWwindow* window);
 void processInput(GLFWwindow* window);
-void createMatrices();
-mat4 FPView(vec3 pos, float rotX, float rotY);
+void createMatrices(GLFWwindow* window);
+mat4 FPView(GLFWwindow* window, float rotX, float rotY);
 void Mouse(GLFWwindow* window, double initialTime);
 
 
@@ -189,7 +189,7 @@ void display(GLFWwindow* window)
             int idFactorAmb = glGetUniformLocation(programID, "factorAmbiental");
             glUniform1f(idFactorAmb, 1.0f);
 
-            createMatrices();//Crea las matrices
+            createMatrices(window);//Crea las matrices
             //CARGA LAS MATRICES EN LOS SHADERS
             int modelLoc = glGetUniformLocation(programID, "model");
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(Current_model.getModelMatrix()));
@@ -246,14 +246,16 @@ void processInput(GLFWwindow* window)
 {
 
     //Los controles se invierten, el sumar es abajo en lugar de arriba
-    //if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) 
-
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) mov += forward_ * speed;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) mov -= forward_ * speed;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) mov += sides_ * speed;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) mov -= sides_ * speed;
 }
 
-void createMatrices()
+void createMatrices(GLFWwindow* window)
 {
     //Vista
-    view = FPView(vec3(0.0f, -0.5f, -7.0f), pitch_, yaw_);
+    view = FPView(window, pitch_, yaw_);
 
     //Proyección
     projection = perspective(radians(45.0f), (float)(resX / resY), 0.1f, 100.0f);//Ángulo de visión
@@ -262,7 +264,7 @@ void createMatrices()
 
 
 //Ángulos en RADIANES
-mat4 FPView(vec3 pos, float rotX, float rotY)
+mat4 FPView(GLFWwindow* window, float rotX, float rotY)
 {
     mat4 view;
     rotX = radians(rotX);
@@ -275,8 +277,13 @@ mat4 FPView(vec3 pos, float rotX, float rotY)
     //Rotacion en Y
     view = rotate(view, rotY, vec3(0.0f, 1.0f, 0.0f));
 
+
+    forward_ = vec3(-view[2].x, 0.0f, view[2].z);
+    sides_ = vec3(view[0].x, 0.0f, -view[0].z);
+    
+
     //Traslacion
-    view = translate(view, pos);
+    view = translate(view, mov);
 
     return view;
 }
@@ -288,7 +295,7 @@ void Mouse(GLFWwindow* window , double initialTime)
     double finalTime = glfwGetTime();
     double deltaTime = finalTime - initialTime;
     yaw_ -= mouseSpeed * deltaTime * float(resX / 2 - posx);
-    yaw2 += mouseSpeed * deltaTime * float(resX / 2 - posx);
+    //yaw2 += mouseSpeed * deltaTime * float(resX / 2 - posx);
     pitch_ -= mouseSpeed * deltaTime * float(resY / 2 - posy);
     if (pitch_ >= 45) pitch_ = 45;
     if (pitch_ <= -25) pitch_ = -25;

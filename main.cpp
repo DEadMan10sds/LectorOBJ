@@ -63,7 +63,6 @@ void createMatrices();
 mat4 FPView(vec3 pos, float rotX, float rotY);
 void Mouse(GLFWwindow* window, double initialTime);
 
-static void cursorPositionCallback(GLFWwindow* window, double xPos, double yPos);
 
 int main()
 {
@@ -247,7 +246,7 @@ void processInput(GLFWwindow* window)
 {
 
     //Los controles se invierten, el sumar es abajo en lugar de arriba
-    
+    //if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) 
 
 }
 
@@ -276,9 +275,6 @@ mat4 FPView(vec3 pos, float rotX, float rotY)
     //Rotacion en Y
     view = rotate(view, rotY, vec3(0.0f, 1.0f, 0.0f));
 
-
-
-
     //Traslacion
     view = translate(view, pos);
 
@@ -294,4 +290,7 @@ void Mouse(GLFWwindow* window , double initialTime)
     yaw_ -= mouseSpeed * deltaTime * float(resX / 2 - posx);
     yaw2 += mouseSpeed * deltaTime * float(resX / 2 - posx);
     pitch_ -= mouseSpeed * deltaTime * float(resY / 2 - posy);
+    if (pitch_ >= 45) pitch_ = 45;
+    if (pitch_ <= -25) pitch_ = -25;
+    
 }

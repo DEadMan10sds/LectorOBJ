@@ -78,7 +78,7 @@ class File
 		mat4 getModelMatrix();
 
 		void freeBufferShaders();
-		void keepView(vec3 position, float xrot, float yrot);
+		void keepView(vec3 position);
 		void translate_model(vec3 new_position, float xrot, float yrot);
 		void setPosition();
 };

@@ -182,8 +182,9 @@ void display(GLFWwindow* window)
 
             if (i == 1)
             {
-                //Current_model.keepView(mov, pitch_, yaw_);
+                
                 Current_model.translate_model(mov, pitch_, yaw_);
+                //Current_model.keepView(mov);
             }
 
             //VARIABLES UNIFORMES
@@ -250,12 +251,8 @@ void display(GLFWwindow* window)
 
 void processInput(GLFWwindow* window)
 {
-
     //Los controles se invierten, el sumar es abajo en lugar de arriba
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-    {
-        mov += forward_ * speed;
-    }
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) mov += forward_ * speed;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) mov -= forward_ * speed;
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) mov += sides_ * speed;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) mov -= sides_ * speed;

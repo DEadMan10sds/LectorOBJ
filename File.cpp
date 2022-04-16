@@ -288,10 +288,12 @@ void File::freeBufferShaders()
 	/*glDeleteProgram(programID);*/
 }
 
-void File::keepView(vec3 position, float xrot, float yrot)
+void File::keepView(vec3 position)
 {
 	
-	//ModelMatrix = translate(ModelMatrix, position);
+	vec3 new_position(position.x + 1.4f, position.y - 0.2f, -position.z - 1.0);
+
+	ModelMatrix = translate(ModelMatrix, new_position);
 
 }
 
@@ -299,11 +301,19 @@ void File::translate_model(vec3 new_position, float xrot, float yrot)
 {
 	float rotX = radians(xrot);
 	float rotY = radians(yrot);
-	vec3 position(-new_position.x + 1.4f, new_position.y - 0.2f, -new_position.z - 1.0);
 	
-	ModelMatrix = rotate(ModelMatrix, rotX, vec3(1.0f, 0.0f, 0.0f));
+	mat4 zero(1.0f);
 
-	ModelMatrix = translate(ModelMatrix, position);
+	mat4 rotationy = rotate(zero, rotY, vec3(0.0f, -1.0f, 0.0f));
+	mat4 rotationp = rotate(zero, rotX, vec3(-1.0f, 0.0f, 0.0f));
+	mat4 rotation = rotationy * rotationp;
+	vec3 position(new_position.x + 1.4f, new_position.y - 0.2f, -new_position.z - 1.0);
+	mat4 trans_to_pivot = translate(zero, position);
+	mat4 trans_from_pivot = translate(zero, -position);
+	mat4 rotate = trans_to_pivot * rotation * trans_from_pivot;
+
+	ModelMatrix = rotate * translate(zero, position);
+	//ModelMatrix = translate(ModelMatrix, position);
 }
 
 void File::setPosition()

@@ -4,6 +4,7 @@ File::File(string _name)//Constructor
 {
 	file_name = _name;
 	loaded = false;
+	ModelMatrix = mat4(1.0f);
 	loadFile();
 }
 
@@ -271,7 +272,7 @@ void File::generate_VAOVBO()
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 6));
 	glEnableVertexAttribArray(2);
 
-	ModelMatrix = mat4(1.0f);
+	//ModelMatrix = mat4(1.0f);
 	//ModelMatrix = translate(ModelMatrix, vec3(0.0, 0.0, 0.0));
 }
 
@@ -285,4 +286,27 @@ void File::freeBufferShaders()
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 	/*glDeleteProgram(programID);*/
+}
+
+void File::keepView(vec3 position, float xrot, float yrot)
+{
+	
+	//ModelMatrix = translate(ModelMatrix, position);
+
+}
+
+void File::translate_model(vec3 new_position, float xrot, float yrot)
+{
+	float rotX = radians(xrot);
+	float rotY = radians(yrot);
+	vec3 position(-new_position.x + 1.4f, new_position.y - 0.2f, -new_position.z - 1.0);
+	
+	ModelMatrix = rotate(ModelMatrix, rotX, vec3(1.0f, 0.0f, 0.0f));
+
+	ModelMatrix = translate(ModelMatrix, position);
+}
+
+void File::setPosition()
+{
+	ModelMatrix = translate(ModelMatrix, vec3(1.4f, -0.7f, 6.0f));
 }

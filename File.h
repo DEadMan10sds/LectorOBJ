@@ -29,6 +29,7 @@ class File
 		GLfloat* buffer;
 		int buffer_size;
 		int faces_amount;
+		int angulo;
 		vector<Object> list_object;
 		vector<Object>::iterator itr_object;
 
@@ -47,6 +48,7 @@ class File
 		GLuint VAO, VBO;
 		
 		mat4 ModelMatrix;
+		vec3 position;
 
 
  
@@ -76,5 +78,8 @@ class File
 		mat4 getModelMatrix();
 
 		void freeBufferShaders();
+		void keepView(vec3 position, float xrot, float yrot);
+		void translate_model(vec3 new_position, float xrot, float yrot);
+		void setPosition();
 };
 

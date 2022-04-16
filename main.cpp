@@ -35,8 +35,8 @@ int resX = 1024, resY = 620;
 int frameCount = 0;
 double initialTime, finalTime, actual_frame_duration; //Tiempo inicial, tiempo final, contador de frames
 double frame_duration = (1 / (float)FPS);
-File archivo("cube.obj");
-File esfera("mono.obj");
+File archivo("mono.obj");
+File arma("gun.obj");
 File plano("plane.obj");
 
 float sensitivity = .5f;
@@ -52,7 +52,7 @@ float mouseSpeed = 1.0f;
 vec3 mov(0.0f, -0.5f, -7.0f);
 vec3 forward_, sides_;
 float speed = .1f;
-bool straight, back, right, left;
+bool camera_mode = true; //True es 1era persona, false es 3era personas
 
 
 //Funciones
@@ -69,7 +69,6 @@ int main()
 
     //Crea ventana
     GLFWwindow* window = InitWindow(resX, resY);
-    archivo.show_text_data();
     if (window)
         display(window);
     //if (archivo.getLoadedStatus())//Verifica que se cargue el archivo
@@ -138,14 +137,15 @@ void display(GLFWwindow* window)
     unsigned int counter = 0;
     double local_current_time = 0, local_timeDiff = 0;
 
+    //arma.setPosition();
+
     crntTime = glfwGetTime();//Obtiene el tiempo actual segun opengl
 
     //Crear lista de objetos del programa
     vector<File> lista_objetos_programa;
     lista_objetos_programa.push_back(archivo);
-    lista_objetos_programa.push_back(esfera);
+    lista_objetos_programa.push_back(arma);
     lista_objetos_programa.push_back(plano);
-    cout << "Lista de objetos creada" << endl;
     for (int i = 0; i < lista_objetos_programa.size(); i++)
     {
         lista_objetos_programa[i].createBuffer();
@@ -168,17 +168,23 @@ void display(GLFWwindow* window)
         if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) programID = programIDP;
         if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) programID = programIDG;
         if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) programID = programIDF;
-
+        if (glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS) camera_mode = true;
         //glfwSetMouseButtonCallback(window, mouse_button_callback);
         glfwSetCursorPos(window, resX / 2, resY / 2);
         processInput(window);
-       
+        
 
         for (int i = 0; i < lista_objetos_programa.size(); i++)
         {
             lista_objetos_programa[i].generate_VAOVBO();
             File Current_model = lista_objetos_programa[i];
             glUseProgram(programID);//Cargan los shaders
+
+            if (i == 1)
+            {
+                //Current_model.keepView(mov, pitch_, yaw_);
+                Current_model.translate_model(mov, pitch_, yaw_);
+            }
 
             //VARIABLES UNIFORMES
             //Solo quedan dentro del ciclo for (al igual que los shaders) si se van a cambiar dependiendo del objeto
@@ -246,7 +252,10 @@ void processInput(GLFWwindow* window)
 {
 
     //Los controles se invierten, el sumar es abajo en lugar de arriba
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) mov += forward_ * speed;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    {
+        mov += forward_ * speed;
+    }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) mov -= forward_ * speed;
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) mov += sides_ * speed;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) mov -= sides_ * speed;

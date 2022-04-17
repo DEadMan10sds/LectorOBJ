@@ -288,35 +288,36 @@ void File::freeBufferShaders()
 	/*glDeleteProgram(programID);*/
 }
 
-void File::keepView(vec3 position)
+void File::translate_model(vec3 position, bool camera_mode)
 {
-	
-	vec3 new_position(position.x + 1.4f, position.y - 0.2f, -position.z - 1.0);
+	vec3 firstPerson(position.x - 1.4f, position.y + 1.0f, position.z + 4.0f);
+	vec3 thirdPerson(position.x, position.y + 1.7f, position.z + 5.0f);
 
+	if (camera_mode) ModelMatrix = translate(ModelMatrix, -firstPerson);
+	else ModelMatrix = translate(ModelMatrix, -thirdPerson);
+
+}
+
+void File::rotate_modelTP(vec3 new_position, float yrot)
+{
+
+	ModelMatrix = translate(ModelMatrix, -new_position);
+
+	ModelMatrix = rotate(ModelMatrix, yrot, vec3(0.0f, -1.0f, 0.0f));
+	
 	ModelMatrix = translate(ModelMatrix, new_position);
 
 }
 
-void File::translate_model(vec3 new_position, float xrot, float yrot)
+void File::rotate_modelFP(vec3 new_position, float xrot, float yrot)
 {
-	float rotX = radians(xrot);
-	float rotY = radians(yrot);
+
+	ModelMatrix = translate(ModelMatrix, -new_position);
+
+	ModelMatrix = rotate(ModelMatrix, yrot, vec3(0.0f, -1.0f, 0.0f));
+	ModelMatrix = rotate(ModelMatrix, xrot, vec3(-1.0f, 0.0f, 0.0f));
 	
-	mat4 zero(1.0f);
 
-	mat4 rotationy = rotate(zero, rotY, vec3(0.0f, -1.0f, 0.0f));
-	mat4 rotationp = rotate(zero, rotX, vec3(-1.0f, 0.0f, 0.0f));
-	mat4 rotation = rotationy * rotationp;
-	vec3 position(new_position.x + 1.4f, new_position.y - 0.2f, -new_position.z - 1.0);
-	mat4 trans_to_pivot = translate(zero, position);
-	mat4 trans_from_pivot = translate(zero, -position);
-	mat4 rotate = trans_to_pivot * rotation * trans_from_pivot;
+	ModelMatrix = translate(ModelMatrix, new_position);
 
-	ModelMatrix = rotate * translate(zero, position);
-	//ModelMatrix = translate(ModelMatrix, position);
-}
-
-void File::setPosition()
-{
-	ModelMatrix = translate(ModelMatrix, vec3(1.4f, -0.7f, 6.0f));
 }

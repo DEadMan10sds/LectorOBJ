@@ -36,7 +36,7 @@ int frameCount = 0;
 double initialTime, finalTime, actual_frame_duration; //Tiempo inicial, tiempo final, contador de frames
 double frame_duration = (1 / (float)FPS);
 File archivo("mono.obj");
-File arma("gun.obj");
+File arma("Pelican.obj");
 File plano("plane.obj");
 
 float sensitivity = .5f;
@@ -168,7 +168,7 @@ void display(GLFWwindow* window)
         if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) programID = programIDP;
         if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) programID = programIDG;
         if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) programID = programIDF;
-        if (glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS) camera_mode = true;
+        
         //glfwSetMouseButtonCallback(window, mouse_button_callback);
         glfwSetCursorPos(window, resX / 2, resY / 2);
         processInput(window);
@@ -183,8 +183,9 @@ void display(GLFWwindow* window)
             if (i == 1)
             {
                 
-                Current_model.translate_model(mov, pitch_, yaw_);
-                //Current_model.keepView(mov);
+                if(camera_mode) Current_model.rotate_modelFP(mov, radians(pitch_), radians(yaw_)); 
+                else Current_model.rotate_modelTP(mov, radians(yaw_));
+                Current_model.translate_model(mov, camera_mode);
             }
 
             //VARIABLES UNIFORMES
@@ -195,6 +196,10 @@ void display(GLFWwindow* window)
 
             int idFactorAmb = glGetUniformLocation(programID, "factorAmbiental");
             glUniform1f(idFactorAmb, 1.0f);
+
+            glBegin(GL_POINT);
+            glVertex3f(0.0f, 0.0f, 0.0f);
+            glEnd();
 
             createMatrices(window);//Crea las matrices
             //CARGA LAS MATRICES EN LOS SHADERS
@@ -256,6 +261,7 @@ void processInput(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) mov -= forward_ * speed;
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) mov += sides_ * speed;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) mov -= sides_ * speed;
+    if (glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS) camera_mode = !camera_mode;
 }
 
 void createMatrices(GLFWwindow* window)

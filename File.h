@@ -78,8 +78,8 @@ class File
 		mat4 getModelMatrix();
 
 		void freeBufferShaders();
-		void keepView(vec3 position);
-		void translate_model(vec3 new_position, float xrot, float yrot);
-		void setPosition();
+		void translate_model(vec3 position, bool camera_mode);
+		void rotate_modelTP(vec3 new_position, float yrot);
+		void rotate_modelFP(vec3 new_position, float xrot, float yrot);
 };
 

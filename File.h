@@ -81,5 +81,6 @@ class File
 		void translate_model(vec3 position, bool camera_mode);
 		void rotate_modelTP(vec3 new_position, float yrot);
 		void rotate_modelFP(vec3 new_position, float xrot, float yrot);
+		void translation_model(vec3 position);
 };
 

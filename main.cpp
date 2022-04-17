@@ -18,6 +18,10 @@
 #include <GLM/gtc/type_ptr.hpp>
 #include <GLM/gtx/string_cast.hpp>
 
+//Cargador de imágenes
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"//Sólo se agrega en este archivo para que no tener duplicidad de código
+
 #include "File.h"
 #include "Vertex.h"
 #include "shader.hpp"
@@ -50,9 +54,10 @@ double finY, finX;
 double yaw_, yaw2, pitch_;
 float mouseSpeed = 1.0f;
 vec3 mov(0.0f, -0.5f, -7.0f);
+vec3 pivot(0.0f, -.5f, -5.0f);
 vec3 forward_, sides_;
 float speed = .1f;
-bool camera_mode = true; //True es 1era persona, false es 3era personas
+bool camera_mode = false; //True es 1era persona, false es 3era personas
 
 
 //Funciones
@@ -137,8 +142,7 @@ void display(GLFWwindow* window)
     unsigned int counter = 0;
     double local_current_time = 0, local_timeDiff = 0;
 
-    //arma.setPosition();
-
+    //arma.translation_model(mov);
     crntTime = glfwGetTime();//Obtiene el tiempo actual segun opengl
 
     //Crear lista de objetos del programa
@@ -183,9 +187,17 @@ void display(GLFWwindow* window)
             if (i == 1)
             {
                 
-                if(camera_mode) Current_model.rotate_modelFP(mov, radians(pitch_), radians(yaw_)); 
-                else Current_model.rotate_modelTP(mov, radians(yaw_));
-                Current_model.translate_model(mov, camera_mode);
+                if (camera_mode)
+                {
+                    Current_model.rotate_modelFP(mov, radians(pitch_), radians(yaw_));
+                    Current_model.translate_model(mov, camera_mode);
+                }
+                else
+                {
+                    Current_model.rotate_modelTP(pivot, radians(yaw_));
+                    Current_model.translate_model(pivot, camera_mode);
+                }
+                
             }
 
             //VARIABLES UNIFORMES
@@ -257,10 +269,27 @@ void display(GLFWwindow* window)
 void processInput(GLFWwindow* window)
 {
     //Los controles se invierten, el sumar es abajo en lugar de arriba
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) mov += forward_ * speed;
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) mov -= forward_ * speed;
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) mov += sides_ * speed;
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) mov -= sides_ * speed;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+    {
+        mov += forward_ * speed;
+        pivot += forward_ * speed;
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+    {
+        mov -= forward_ * speed;
+        pivot -= forward_ * speed;
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    {
+        mov += sides_ * speed;
+        pivot += sides_ * speed;
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    {
+        mov -= sides_ * speed;
+        pivot -= sides_ * speed;
+    }
+
     if (glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS) camera_mode = !camera_mode;
 }
 
@@ -279,23 +308,33 @@ void createMatrices(GLFWwindow* window)
 mat4 FPView(GLFWwindow* window, float rotX, float rotY)
 {
     mat4 view;
-    rotX = radians(rotX);
-    rotY = radians(rotY);
+    float rotXr = radians(rotX);
+    float rotYr = radians(rotY);
 
 
-    //Rotacion en X
-    view = rotate(mat4(1.0f), rotX, vec3(1.0f, 0.0f, 0.0f));
+    if (camera_mode)
+    {
+        //Rotacion en X
+        view = rotate(mat4(1.0f), rotXr, vec3(1.0f, 0.0f, 0.0f));
+        //Rotacion en Y
+        view = rotate(view, rotYr, vec3(0.0f, 1.0f, 0.0f));
+        forward_ = vec3(-view[2].x, 0.0f, view[2].z);
+        sides_ = vec3(view[0].x, 0.0f, -view[0].z);
+        //Traslacion
+        view = translate(view, mov);
+    }
+    else
+    {
+        view = translate(mat4(1.0f), pivot);
+        view = rotate(view, rotYr, vec3(0.0f, -1.0f, 0.0f));
+        view = translate(view, -pivot);
+        mat4 view_rotated = rotate(view, rotYr, vec3(0.0f, 1.0f, 0.0f));
+        forward_ = vec3(-view_rotated[2].x, 0.0f, view_rotated[2].z);
+        sides_ = vec3(view_rotated[0].x, 0.0f, -view_rotated[0].z);
 
-    //Rotacion en Y
-    view = rotate(view, rotY, vec3(0.0f, 1.0f, 0.0f));
-
-
-    forward_ = vec3(-view[2].x, 0.0f, view[2].z);
-    sides_ = vec3(view[0].x, 0.0f, -view[0].z);
-    
-
-    //Traslacion
-    view = translate(view, mov);
+        //Traslacion
+        view = translate(view, pivot);
+    }
 
     return view;
 }

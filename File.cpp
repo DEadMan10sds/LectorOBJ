@@ -154,7 +154,6 @@ GLfloat File::return_ZVertexList(int index)
 //GENERA EL ARRAY CON LOS DATOS EN ORDEN
 void File::createBuffer()
 {
-	
 	buffer_size = faces_amount * 3 * 9;
 	int color = 0;
 	list_Buffer_data.clear();
@@ -168,7 +167,6 @@ void File::createBuffer()
 			vector<int> normal_face = face_itr->returnNormalList();
 			for (vector<int>::iterator index_face_list = vertices_face.begin(); index_face_list != vertices_face.end(); (++index_face_list))//Recorre los vértices de la cara del objeto
 			{
-				
 				//ORDEN DE BUFFER: POSICIÓN - NORMAL - COLOR
 				vector<Vertex>::iterator index_vertices = list_vertices.begin();//Asigna un iterador al inicio de la lista de vértices
 				advance(index_vertices, (*index_face_list) - 1);//Mueve el iterador hasta el vértice
@@ -291,33 +289,25 @@ void File::freeBufferShaders()
 void File::translate_model(vec3 position, bool camera_mode)
 {
 	vec3 firstPerson(position.x - 1.4f, position.y + 1.0f, position.z + 4.0f);
-	vec3 thirdPerson(position.x, position.y + 1.7f, position.z + 5.0f);
-
+	vec3 thirdPerson(position.x, position.y + 2.7f, position.z + 9.0f);
 	if (camera_mode) ModelMatrix = translate(ModelMatrix, -firstPerson);
 	else ModelMatrix = translate(ModelMatrix, -thirdPerson);
-
 }
 
 void File::rotate_modelTP(vec3 new_position, float yrot)
 {
-
-	ModelMatrix = translate(ModelMatrix, -new_position);
-
-	ModelMatrix = rotate(ModelMatrix, yrot, vec3(0.0f, -1.0f, 0.0f));
-	
-	ModelMatrix = translate(ModelMatrix, new_position);
-
+	ModelMatrix = rotate(ModelMatrix, yrot, vec3(0.0f, 1.0f, 0.0f));
 }
 
 void File::rotate_modelFP(vec3 new_position, float xrot, float yrot)
 {
-
 	ModelMatrix = translate(ModelMatrix, -new_position);
-
 	ModelMatrix = rotate(ModelMatrix, yrot, vec3(0.0f, -1.0f, 0.0f));
 	ModelMatrix = rotate(ModelMatrix, xrot, vec3(-1.0f, 0.0f, 0.0f));
-	
-
 	ModelMatrix = translate(ModelMatrix, new_position);
+}
 
+void File::translation_model(vec3 position)
+{
+	ModelMatrix = translate(ModelMatrix, position);
 }

@@ -154,8 +154,9 @@ GLfloat File::return_ZVertexList(int index)
 //GENERA EL ARRAY CON LOS DATOS EN ORDEN
 void File::createBuffer()
 {
-	buffer_size = faces_amount * 3 * 9;
-	int color = 0;
+	buffer_size = faces_amount * 3 * 11;
+	cout << buffer_size << endl;
+	int color = 0, textura = 0;
 	list_Buffer_data.clear();
 	vector<Object>::iterator object_itr;
 	for (object_itr = list_object.begin(); object_itr != list_object.end(); (++object_itr))//Recorre cada objeto
@@ -174,7 +175,7 @@ void File::createBuffer()
 				list_Buffer_data.push_back(vertice_aux.returnX());//Guarda todos los valores de coordenadas
 				list_Buffer_data.push_back(vertice_aux.returnY());
 				list_Buffer_data.push_back(vertice_aux.returnZ());
-				
+
 				//Almacenamiento de las normales
 				vector<Vertex>::iterator index_normal = list_normal.begin();
 				vector<int>::iterator iterador_lista_normales = normal_face.begin();
@@ -201,6 +202,12 @@ void File::createBuffer()
 				color++;
 				if (color == 3)
 					color = 0;
+
+				//Textura - datos basura
+				list_Buffer_data.push_back(textura);
+				textura++;
+				list_Buffer_data.push_back(textura);
+				textura++;
 			}
 		}
 	}
@@ -244,10 +251,11 @@ GLint File::getVBO_VertexBufferid()
 
 void File::generate_VAOVBO()
 {
-	buffer = new GLfloat[returnBufferSize()];
-	for (int i = 0; i < returnBufferSize(); i++)//Copia el buffer de la clase File al arreglo dinamico
+	buffer = new GLfloat[buffer_size];
+	for (int i = 0; i < buffer_size; i++)//Copia el buffer de la clase File al arreglo dinamico
 	{
-		buffer[i] = getBufferData(i);
+		//cout << i << endl;
+		buffer[i] = list_Buffer_data[i];
 	}
 
 	const GLfloat* vertices = buffer;
@@ -255,20 +263,22 @@ void File::generate_VAOVBO()
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
 
-	int tam = returnBufferSize() * 4;
 
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, tam, vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * buffer_size, vertices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 9, (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 11, (void*)0);
 	glEnableVertexAttribArray(0);
 
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 3));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 3));
 	glEnableVertexAttribArray(1);
 
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 9 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 6));
-	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 6));
+	glEnableVertexAttribArray(2); 
+
+	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 9));
+	glEnableVertexAttribArray(3);
 
 	//ModelMatrix = mat4(1.0f);
 	//ModelMatrix = translate(ModelMatrix, vec3(0.0, 0.0, 0.0));
@@ -296,7 +306,8 @@ void File::translate_model(vec3 position, bool camera_mode)
 
 void File::rotate_modelTP(vec3 new_position, float yrot)
 {
-	ModelMatrix = rotate(ModelMatrix, yrot, vec3(0.0f, 1.0f, 0.0f));
+	ModelMatrix = rotate(ModelMatrix, yrot, vec3(0.0f, -1.0f, 0.0f));
+	//ModelMatrix = translate(ModelMatrix, new_position);
 }
 
 void File::rotate_modelFP(vec3 new_position, float xrot, float yrot)

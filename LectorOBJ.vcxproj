@@ -178,10 +178,12 @@
     <None Include="flat_fs.glsl" />
     <None Include="flat_vs.glsl" />
     <None Include="fs1.glsl" />
+    <None Include="fs1Texture.glsl" />
     <None Include="fs_basico.glsl" />
     <None Include="Gouraud_fs.glsl" />
     <None Include="Gouraud_vs.glsl" />
     <None Include="vs1.glsl" />
+    <None Include="vs1Texture.glsl" />
     <None Include="vs_basico.glsl" />
   </ItemGroup>
   <ItemGroup>

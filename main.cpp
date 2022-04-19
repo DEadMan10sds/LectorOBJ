@@ -39,9 +39,9 @@ int resX = 1024, resY = 620;
 int frameCount = 0;
 double initialTime, finalTime, actual_frame_duration; //Tiempo inicial, tiempo final, contador de frames
 double frame_duration = (1 / (float)FPS);
-File archivo("mono.obj");
+File archivo("cube.obj");
 File arma("Pelican.obj");
-File plano("plane.obj");
+File plano("PlaneTexture.obj");
 
 float sensitivity = .5f;
 
@@ -53,11 +53,12 @@ GLfloat RotX = 0.0f, RotY = 0.0f;
 double finY, finX;
 double yaw_, yaw2, pitch_;
 float mouseSpeed = 1.0f;
-vec3 mov(0.0f, -0.5f, -7.0f);
-vec3 pivot(0.0f, -.5f, -5.0f);
+vec3 mov(0.0f, -2.0f, -5.0f);
+vec3 pivot(0.0f, -1.5f, -5.0f);
+vec3 pivot_fixed(0.0f, -1.5f, -5.0f);
 vec3 forward_, sides_;
 float speed = .1f;
-bool camera_mode = false; //True es 1era persona, false es 3era personas
+bool camera_mode = true; //True es 1era persona, false es 3era personas
 
 
 //Funciones
@@ -67,7 +68,7 @@ void processInput(GLFWwindow* window);
 void createMatrices(GLFWwindow* window);
 mat4 FPView(GLFWwindow* window, float rotX, float rotY);
 void Mouse(GLFWwindow* window, double initialTime);
-
+unsigned int LoadTexture(/*char* texture_route*/);
 
 int main()
 {
@@ -142,8 +143,13 @@ void display(GLFWwindow* window)
     unsigned int counter = 0;
     double local_current_time = 0, local_timeDiff = 0;
 
-    //arma.translation_model(mov);
+
     crntTime = glfwGetTime();//Obtiene el tiempo actual segun opengl
+
+    /*string textureRoute = "woodFloor.jpg";
+    GLuint texture = LoadTexture(textureRoute);*/
+
+    GLuint texture = LoadTexture();
 
     //Crear lista de objetos del programa
     vector<File> lista_objetos_programa;
@@ -156,8 +162,10 @@ void display(GLFWwindow* window)
         cout << "Buffer: " << i << " Creado" << endl;
     }
 
+    cout << "Todos los modelos han creado su buffer" << endl;
+
     //Cargan los shaders
-    GLuint programIDP = LoadShaders( "vs1.glsl", "fs1.glsl"); //phong
+    GLuint programIDP = LoadShaders( "vs1Texture.glsl", "fs1Texture.glsl"); //phong
     GLuint programIDG = LoadShaders("Gouraud_vs.glsl", "Gouraud_fs.glsl"); //Goraud
     GLuint programIDF = LoadShaders("flat_vs.glsl", "flat_fs.glsl"); //flat
 
@@ -183,7 +191,6 @@ void display(GLFWwindow* window)
             lista_objetos_programa[i].generate_VAOVBO();
             File Current_model = lista_objetos_programa[i];
             glUseProgram(programID);//Cargan los shaders
-
             if (i == 1)
             {
                 
@@ -209,10 +216,6 @@ void display(GLFWwindow* window)
             int idFactorAmb = glGetUniformLocation(programID, "factorAmbiental");
             glUniform1f(idFactorAmb, 1.0f);
 
-            glBegin(GL_POINT);
-            glVertex3f(0.0f, 0.0f, 0.0f);
-            glEnd();
-
             createMatrices(window);//Crea las matrices
             //CARGA LAS MATRICES EN LOS SHADERS
             int modelLoc = glGetUniformLocation(programID, "model");
@@ -222,6 +225,7 @@ void display(GLFWwindow* window)
             modelLoc = glGetUniformLocation(programID, "projection");
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(projection));
 
+            glBindTexture(GL_TEXTURE_2D, texture);
 
             glBindVertexArray(Current_model.getVAO_VertexArrayid());
 
@@ -273,21 +277,25 @@ void processInput(GLFWwindow* window)
     {
         mov += forward_ * speed;
         pivot += forward_ * speed;
+        pivot_fixed += forward_ * speed;
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
     {
         mov -= forward_ * speed;
         pivot -= forward_ * speed;
+        pivot_fixed -= forward_ * speed;
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
         mov += sides_ * speed;
         pivot += sides_ * speed;
+        pivot_fixed += sides_ * speed;
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
         mov -= sides_ * speed;
         pivot -= sides_ * speed;
+        pivot_fixed -= sides_ * speed;
     }
 
     if (glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS) camera_mode = !camera_mode;
@@ -314,6 +322,7 @@ mat4 FPView(GLFWwindow* window, float rotX, float rotY)
 
     if (camera_mode)
     {
+        //**************************************APARTADO DE LA CÁMARA DE 1ERA PERSONA**************************************
         //Rotacion en X
         view = rotate(mat4(1.0f), rotXr, vec3(1.0f, 0.0f, 0.0f));
         //Rotacion en Y
@@ -325,12 +334,17 @@ mat4 FPView(GLFWwindow* window, float rotX, float rotY)
     }
     else
     {
+        //**************************************APARTADO DE LA CÁMARA DE 3ERA PERSONA**************************************
+        //Rotacion en Y
         view = translate(mat4(1.0f), pivot);
         view = rotate(view, rotYr, vec3(0.0f, -1.0f, 0.0f));
-        view = translate(view, -pivot);
-        mat4 view_rotated = rotate(view, rotYr, vec3(0.0f, 1.0f, 0.0f));
+        view = translate(mat4(1.0f), -pivot);
+        /*mat4 view_rotated = rotate(view, rotYr, vec3(0.0f, 1.0f, 0.0f));
         forward_ = vec3(-view_rotated[2].x, 0.0f, view_rotated[2].z);
-        sides_ = vec3(view_rotated[0].x, 0.0f, -view_rotated[0].z);
+        sides_ = vec3(view_rotated[0].x, 0.0f, -view_rotated[0].z);*/
+
+        forward_ = vec3(-view[2].x, 0.0f, view[2].z);
+        sides_ = vec3(view[0].x, 0.0f, -view[0].z);
 
         //Traslacion
         view = translate(view, pivot);
@@ -349,6 +363,41 @@ void Mouse(GLFWwindow* window , double initialTime)
     //yaw2 += mouseSpeed * deltaTime * float(resX / 2 - posx);
     pitch_ -= mouseSpeed * deltaTime * float(resY / 2 - posy);
     if (pitch_ >= 45) pitch_ = 45;
-    if (pitch_ <= -25) pitch_ = -25;
-    
+    if (pitch_ <= -25) pitch_ = -25;   
+}
+
+//Función para cargar imágenes
+unsigned int LoadTexture(/*char* texture_route*/)
+{
+
+    //Definición del búfer y configuraciones del mismo buffer de textura para opengl
+    unsigned int texture;
+    glGenTextures(1, &texture); //Genera el espacio y asigna el número de identificador a la variable identificador de textura
+    glBindTexture(GL_TEXTURE_2D, texture);//Enlaza la textura al buffer de textura, es decir, de ahora en adelante todas las 
+    //operaciones de textura se realizarán con este buffer
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //La textura en la que se está trabajando sobre el eje X se va a repetir
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);//Ahora en el eje Y se va a repetir
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); //Elije el filtro nearest para la textura cuando se reduce en tamaño
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);//Igual que el anterior pero para cuando aumenta el tamaño
+
+    //Apartado de carga de archivos usando la función stbi_load de la librería stbimage
+    //width, height, nrChannels se pasan por referencia ya que son valores que regresa la función
+    //ancho - alto - número de canales de color (rgb)
+
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load("metal.jpg", &width, &height, &nrChannels, 0);
+    if (data)//Si se logró abrir la imagen
+    {
+        cout << "Textura creada" << endl;
+        //**************************************SE CARGA EN OPENGL**************************************
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data); //Es textura 2d, nivel, formato en el que se va a guardar la imagen, ancho, alto, borde, formato de la imagen, ubicación de la imagen (dirección de memoria)
+        glGenerateMipmap(GL_TEXTURE_2D);//Crea un conjunto de la misma imagen pero en tamaños diferentes
+    }
+    else cout << "No se pudo cargar la textura" << endl;
+
+    stbi_image_free(data);//Libera la información para no sobrecargar la memoria y evitar duplicidad de datos
+
+    return texture;
 }

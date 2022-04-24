@@ -17,9 +17,9 @@ int Face::showFaceIndex()
 
 void Face::showFaceVertices()
 {
-	for (vector<int>::iterator itr_vertices = list_vertices_face.begin(); itr_vertices != list_vertices_face.end(); (++itr_vertices))
+	for (int i = 0; i < 3; i++)
 	{
-		cout << "||" << *itr_vertices;
+		cout << list_vertices_face[i] << "/" << list_texture[i] << "/" << list_normals[i] << endl;
 	}
 	cout << endl;
 }
@@ -47,4 +47,14 @@ void Face::showNormals(vector<Vertex> global_list_normals)
 vector<int> Face::returnNormalList()
 {
 	return list_normals;
+}
+
+void Face::addTexture(int _texture)
+{
+	list_texture.push_back(_texture);
+}
+
+vector<int> Face::returnTextureList()
+{
+	return list_texture;
 }

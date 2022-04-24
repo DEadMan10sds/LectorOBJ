@@ -8,17 +8,18 @@ in vec3 FragNormal;
 in vec3 FragColor;
 in vec2 FragTextCoord;
 
+uniform sampler2D Texture;
 uniform vec3 colorUniform;
 uniform float factorAmbiental;
-uniform sampler2D Texture;
+
 
 vec4 Light(vec3 objectColor);
 
 void main()
 {
 	//FragColorOut = Light(FragColor);
-	vec4 color = texture(Texture, FragTextCoord);
-	FragColorOut = Light(FragColor * vec3(color.x, color.y, color.z));
+	FragColorOut = texture(Texture, FragTextCoord);
+	//FragColorOut = color;//Light(FragColor * vec3(color.x, color.y, color.z));
 	//FragColorOut = texture(Texture, FragTextCoord);
 }
 

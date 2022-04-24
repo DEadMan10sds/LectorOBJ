@@ -6,6 +6,7 @@
 
 #include "Vertex.h"
 #include "Face.h"
+#include "TextureVertex.h"
 
 using namespace std;
 
@@ -17,6 +18,8 @@ class Object
 		vector<int>::iterator itr_vertices;
 		vector<int> list_normals;
 		vector<int>::iterator itr_normals;
+		vector<int> list_textures;
+		vector<int>::iterator itr_textures;
 		vector<Face> list_faces;
 		vector<Face>::iterator itr_faces;
 	public:
@@ -29,5 +32,7 @@ class Object
 		vector<Face> returnFaceList();
 		void addNormal(int normal);
 		void showNormalList(vector<Vertex> global_list_normals);
+		void addTexture(int texture);
+		void showTextureList(vector<TextureVertex> texture_list);
 };
 

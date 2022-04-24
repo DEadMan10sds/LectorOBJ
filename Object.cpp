@@ -35,7 +35,6 @@ void Object::showFacesList()
 	for (vector<Face>::iterator itr_faces_list = list_faces.begin(); itr_faces_list != list_faces.end(); (++itr_faces_list))
 	{
 		cout << "Cara: " << itr_faces_list->showFaceIndex() << endl;
-		cout << "Vertices: " << endl;
 		itr_faces_list->showFaceVertices();
 	}
 }
@@ -59,5 +58,18 @@ void Object::showNormalList(vector<Vertex> global_list_normals)
 		//file_vertex_list[--(*itr_text_vertices)].showVertex_info();
 		cout << "Normal: " << *itr_object_face_list << endl;
 		global_list_normals[--(*itr_object_face_list)].showVertex_info();
+	}
+}
+
+void Object::addTexture(int texture)
+{
+	list_textures.push_back(texture);
+}
+
+void Object::showTextureList(vector<TextureVertex> texture_list)
+{
+	for (vector<TextureVertex>::iterator itr_texture = texture_list.begin(); itr_texture != texture_list.end(); (++itr_texture))
+	{
+		itr_texture->showData();
 	}
 }

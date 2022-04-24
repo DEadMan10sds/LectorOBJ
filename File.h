@@ -11,6 +11,7 @@
 
 #include "Object.h"
 #include "Vertex.h"
+#include "TextureVertex.h"
 
 #include <GLM/vec3.hpp>
 #include <GLM/vec4.hpp>
@@ -41,6 +42,10 @@ class File
 
 		vector<Vertex> list_normal;
 		vector<Vertex>::iterator itr_normal;
+		
+		vector<TextureVertex> list_texture_coord;
+		vector<TextureVertex>::iterator itr_textcoord;
+
 		bool loaded;
 
 		//Datos únicos por objeto de Opengl
@@ -50,6 +55,7 @@ class File
 		mat4 ModelMatrix;
 		vec3 position;
 
+		GLuint texture;
 
  
 	public: 
@@ -82,5 +88,8 @@ class File
 		void rotate_modelTP(vec3 new_position, float yrot);
 		void rotate_modelFP(vec3 new_position, float xrot, float yrot);
 		void translation_model(vec3 position);
+
+		void setTexture(GLuint new_texture);
+		GLuint returnTexture();
 };
 

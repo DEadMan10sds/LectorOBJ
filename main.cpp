@@ -145,9 +145,9 @@ void display(GLFWwindow* window)
     /*string textureRoute = "woodFloor.jpg";
     GLuint texture = LoadTexture(textureRoute);*/
 
-
+    //Cargar la textura en los modelos
     archivo.setTexture(LoadTexture("tierra.jpg"));
-    arma.setTexture(LoadTexture("tierra.jpg"));
+    arma.setTexture(LoadTexture("grass.jpg"));
 
     //Crear lista de objetos del programa
     vector<File> lista_objetos_programa;

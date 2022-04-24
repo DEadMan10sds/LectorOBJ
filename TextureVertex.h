@@ -17,7 +17,7 @@ class TextureVertex
 		void setUV(GLfloat _u, GLfloat _v);
 		GLfloat getU();
 		GLfloat getV();
-		GLfloat getindex();
+		int getindex();
 		void showData();
 };
 

@@ -40,7 +40,7 @@ int frameCount = 0;
 double initialTime, finalTime, actual_frame_duration; //Tiempo inicial, tiempo final, contador de frames
 double frame_duration = (1 / (float)FPS);
 File archivo("cubo.obj");
-File arma("cubo.obj");
+File arma("pichuTexturized.obj");
 //File plano("PlaneTexture.obj");
 
 float sensitivity = .5f;
@@ -139,15 +139,11 @@ void display(GLFWwindow* window)
     unsigned int counter = 0;
     double local_current_time = 0, local_timeDiff = 0;
 
-
     crntTime = glfwGetTime();//Obtiene el tiempo actual segun opengl
-
-    /*string textureRoute = "woodFloor.jpg";
-    GLuint texture = LoadTexture(textureRoute);*/
 
     //Cargar la textura en los modelos
     archivo.setTexture(LoadTexture("tierra.jpg"));
-    arma.setTexture(LoadTexture("grass.jpg"));
+    arma.setTexture(LoadTexture("PichuTextureInverted.jpg"));
 
     //Crear lista de objetos del programa
     vector<File> lista_objetos_programa;
@@ -164,7 +160,6 @@ void display(GLFWwindow* window)
     cout << "Todos los modelos han creado su buffer" << endl;
     //Cargan los shaders
     GLuint programIDP = LoadShaders( "vs1Texture.glsl", "fs1Texture.glsl"); //phong
-
 
     GLuint programID = programIDP;
     for (int i = 0; i < lista_objetos_programa.size(); i++) lista_objetos_programa[i].generate_VAOVBO();
@@ -253,9 +248,9 @@ void display(GLFWwindow* window)
     }while(!glfwWindowShouldClose(window));
 
     //Ciclo para liberar la memoria de los objetos
-    for (int i = 0; i < lista_objetos_programa.size(); i++)
-        lista_objetos_programa[i].freeBufferShaders();
-    glDeleteProgram(programID);//Si se usan más shaders o shaders distintos por cada prograna se tiene que incluir en el método freeBufferShaders()
+    for (int i = 0; i < lista_objetos_programa.size(); i++) lista_objetos_programa[i].freeBufferShaders();
+    glDeleteProgram(programID);
+    //Si se usan más shaders o shaders distintos por cada prograna se tiene que incluir en el método freeBufferShaders()
 }
 
 

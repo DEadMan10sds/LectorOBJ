@@ -28,7 +28,7 @@ GLfloat TextureVertex::getV()
 	return V;
 }
 
-GLfloat TextureVertex::getindex()
+int TextureVertex::getindex()
 {
 	return index;
 }

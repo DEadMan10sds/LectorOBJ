@@ -29,6 +29,46 @@ bool File::loadFile()
 				Object new_object(line);
 				list_object.push_back(new_object);
 			}
+			if (line[0] == 'v' && ((line[1] != 'n') && (line[1] != 't')))
+			{
+				number_Vertices++;
+				line.erase(0, 2);
+				Vertex new_vertex(number_Vertices);
+				stringstream vertices;
+				vertices << line;
+				vertices >> x >> y >> z;
+				new_vertex.load_Vertex_info(x, y, z);
+				list_vertices.push_back(new_vertex);
+				itr_object = --list_object.end();
+				itr_object->addVertex(number_Vertices);
+				//itr_object = list_object.end();
+			}
+			if (line[0] == 'v' && line[1] == 't')
+			{
+				line.erase(0, 3);
+				texture_vertex++;
+				TextureVertex aux_TextVertex(texture_vertex);
+				stringstream texture_aux;
+				texture_aux << line;
+				texture_aux >> u >> v;
+				aux_TextVertex.setUV(u, v);
+				list_texture_coord.push_back(aux_TextVertex);
+				itr_object = --list_object.end();
+				itr_object->addTexture(texture_vertex);
+			}
+			if (line[0] == 'v' && line[1] == 'n')
+			{
+				line.erase(0, 3);
+				normals++;
+				Vertex aux_normal(normals);
+				stringstream normal_aux;
+				normal_aux << line;
+				normal_aux >> x >> y >> z;
+				aux_normal.load_Vertex_info(x, y, z);
+				list_normal.push_back(aux_normal);
+				itr_object = --list_object.end();
+				itr_object->addNormal(normals);
+			}
 			if (line[0] == 'f')
 			{
 				int aux = 0;
@@ -37,7 +77,7 @@ bool File::loadFile()
 				Face new_face(number_face);
 				line.erase(0, 2);
 				for (int i = 0; i < line.length(); i++)
-					if (line[i] == '/') 
+					if (line[i] == '/')
 						line[i] = ' ';
 				stringstream face_vertices(line);
 				//Vertice - textura - normal
@@ -55,46 +95,6 @@ bool File::loadFile()
 				itr_object = --list_object.end();
 				itr_object->addFace(new_face);
 				//itr_object = list_object.end();
-			}
-			if (line[0] == 'v' && ((line[1] != 'n') && (line[1] != 't')))
-			{
-				number_Vertices++;
-				line.erase(0, 2);
-				Vertex new_vertex(number_Vertices);
-				stringstream vertices;
-				vertices << line;
-				vertices >> x >> y >> z;
-				new_vertex.load_Vertex_info(x, y, z);
-				list_vertices.push_back(new_vertex);
-				itr_object = --list_object.end();
-				itr_object->addVertex(number_Vertices);
-				//itr_object = list_object.end();
-			}
-			if (line[0] == 'v' && line[1] == 'n')
-			{
-				line.erase(0, 3);
-				normals++;
-				Vertex aux_normal(normals);
-				stringstream normal_aux;
-				normal_aux << line;
-				normal_aux >> x >> y >> z;
-				aux_normal.load_Vertex_info(x, y, z);
-				list_normal.push_back(aux_normal);
-				itr_object = --list_object.end();
-				itr_object->addNormal(normals);
-			}
-			if (line[0] == 'v' && line[1] == 't')
-			{
-				line.erase(0, 3);
-				texture_vertex++;
-				TextureVertex aux_TextVertex(texture_vertex);
-				stringstream texture_aux;
-				texture_aux << line;
-				texture_aux >> u >> v;
-				aux_TextVertex.setUV(u, v);
-				list_texture_coord.push_back(aux_TextVertex);
-				itr_object = --list_object.end();
-				itr_object->addTexture(texture_vertex);
 			}
 		}
 		loaded = true;
@@ -163,7 +163,7 @@ GLfloat File::return_ZVertexList(int index)
 void File::createBuffer()
 {
 	cout << "Asignar info buffer" << endl;
-	buffer_size = faces_amount * 3 * 11;
+	buffer_size = (faces_amount * 3 * 11);
 	cout << buffer_size << endl;
 	int color = 0;
 	list_Buffer_data.clear();
@@ -176,6 +176,7 @@ void File::createBuffer()
 			vector<int> vertices_face = face_itr->returnVertexList();
 			vector<int> normal_face = face_itr->returnNormalList();
 			vector<int> texture_face = face_itr->returnTextureList();
+			int i = 0;
 			for (vector<int>::iterator index_face_list = vertices_face.begin(); index_face_list != vertices_face.end(); (++index_face_list))//Recorre los vértices de la cara del objeto
 			{
 				//ORDEN DE BUFFER: POSICIÓN 3 - NORMAL 3 - COLOR 3 - TEXTURA 2
@@ -186,47 +187,67 @@ void File::createBuffer()
 				list_Buffer_data.push_back(vertice_aux.returnY());
 				list_Buffer_data.push_back(vertice_aux.returnZ());
 
+				
 				//Almacenamiento de las normales
 				vector<Vertex>::iterator index_normal = list_normal.begin();
-				vector<int>::iterator iterador_lista_normales = normal_face.begin();
+				vector<int>::iterator iterador_lista_normales = (normal_face.begin() + i);
 				advance(index_normal, (*iterador_lista_normales) - 1);
 				Vertex normal_aux = *index_normal;
 				list_Buffer_data.push_back(normal_aux.returnX());
 				list_Buffer_data.push_back(normal_aux.returnY());
 				list_Buffer_data.push_back(normal_aux.returnZ());
-				//Define el color 1 x 1, 
 
-				//EDITAR PARA QUE CARGUE LAS NORMALES
+				/*cout << "Vertice: " << endl;
+				vertice_aux.showVertex_info();
+				cout << "Normal: " << endl;
+				normal_aux.showVertex_info();
+				cout << "Color: ";*/
+				
 				if (color == 0)
+				{
 					list_Buffer_data.push_back(1);
+					//cout << " 1 ";
+				}
 				else
+
+				{
 					list_Buffer_data.push_back(0);
+					//cout << " 0 ";
+				}
 				if (color == 1)
+				{
 					list_Buffer_data.push_back(1);
+					//cout << " 1 ";
+				}
 				else
+				{
 					list_Buffer_data.push_back(0);
+					//cout << " 0 ";
+				}
 				if (color == 2)
+				{
 					list_Buffer_data.push_back(1);
+					//cout << " 1 " << endl;
+				}
 				else
+				{
 					list_Buffer_data.push_back(0);
+					//cout << " 0 " << endl;
+				}
 				color++;
 				if (color == 3)
 					color = 0;
 
 				
 				//Textura - Similar a las normales
-				vector<TextureVertex>::iterator texture_normal = list_texture_coord.begin();
-				//cout << "Iterador en el inicio" << endl;
-				vector<int>::iterator iterador_lista_texturas = texture_face.begin();
-				//cout << "Iterador de índices en el inicio" << endl;
-				advance(texture_normal, (*iterador_lista_texturas) - 1);
-				//cout << "Posición definida" << (*iterador_lista_texturas) - 1  << endl;
-				TextureVertex texture_aux = *texture_normal;
-				//texture_aux.showData();
-				//cout << "Info asignada" << endl;
+				vector<TextureVertex>::iterator texture_index = list_texture_coord.begin();
+				vector<int>::iterator iterador_lista_texturas = (texture_face.begin()+i);
+				advance(texture_index, (*iterador_lista_texturas) - 1);
+				TextureVertex texture_aux = *texture_index;
 				list_Buffer_data.push_back(texture_aux.getU());
-				//cout << "Asignar textura" << endl;
 				list_Buffer_data.push_back(texture_aux.getV());
+				//texture_aux.showData();
+				i++;
 			}
 		}
 	}
@@ -289,16 +310,14 @@ void File::generate_VAOVBO()
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, (sizeof(GLfloat) * buffer_size), vertices, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 11, (void*)0);
-	glEnableVertexAttribArray(0);
-
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 0));
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 3));
-	glEnableVertexAttribArray(1);
-
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 6));
-	glEnableVertexAttribArray(2);
-
 	glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (void*)(sizeof(GLfloat) * 9));
+	
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
 	glEnableVertexAttribArray(3);
 
 	//ModelMatrix = mat4(1.0f);

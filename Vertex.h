@@ -18,6 +18,7 @@ class Vertex
 		GLfloat returnX();
 		GLfloat returnY();
 		GLfloat returnZ();
+		void setY(GLfloat _y);
 
 };
 

@@ -26,7 +26,6 @@
 #include "Vertex.h"
 #include "shader.hpp"
 
-
 //CONSTANTES
 #define FPS 60 //FPS máximos
 
@@ -41,12 +40,16 @@ double initialTime, finalTime, actual_frame_duration; //Tiempo inicial, tiempo f
 double frame_duration = (1 / (float)FPS);
 File archivo("cubo.obj");
 File arma("pichuTexturized.obj");
-//File plano("PlaneTexture.obj");
+File skybox("Icielo.obj");
+File plano("terreno.obj");
 
 float sensitivity = .5f;
 
+vector<GLbyte> rawHighs;
+int GWidth, GHeight;
+
 //Variables locales de matrices
-mat4 view, projection;
+mat4 view, projection, player_final;
 
 //Variables globales para rotaciones de cámara
 GLfloat RotX = 0.0f, RotY = 0.0f;
@@ -65,10 +68,11 @@ bool camera_mode = true; //True es 1era persona, false es 3era personas
 GLFWwindow* InitWindow(const int resX, const int resY);
 void display(GLFWwindow* window);
 void processInput(GLFWwindow* window);
-void createMatrices(GLFWwindow* window);
-mat4 FPView(GLFWwindow* window, float rotX, float rotY);
+void createMatrices(GLFWwindow* window, mat4 matrix_player);
+mat4 FPView(GLFWwindow* window, float rotX, float rotY, mat4 player);
 void Mouse(GLFWwindow* window, double initialTime);
 unsigned int LoadTexture(const char* texture_route);
+void LoadNoiseTerrain();
 
 int main()
 {
@@ -77,7 +81,11 @@ int main()
     //archivo.show_text_data();//Muestra txt del archivo
     GLFWwindow* window = InitWindow(resX, resY);
     if (window)
+    {
+        LoadNoiseTerrain();
         display(window);
+    }
+        
 
     glfwDestroyWindow(window);
     glfwTerminate();
@@ -144,12 +152,19 @@ void display(GLFWwindow* window)
     //Cargar la textura en los modelos
     archivo.setTexture(LoadTexture("tierra.jpg"));
     arma.setTexture(LoadTexture("PichuTextureInverted.jpg"));
+    skybox.setTexture(LoadTexture("cloudySea.jpg"));
+    plano.setTexture(LoadTexture("wood.jpeg"));
 
+    //Llamar función para editar la altura del plano
+    //plano.recorrerAltura(rawHighs, GWidth, GHeight);
+
+    //terreno.setTexture(LoadTexture("mar.jpg"));
     //Crear lista de objetos del programa
     vector<File> lista_objetos_programa;
     lista_objetos_programa.push_back(archivo);
     lista_objetos_programa.push_back(arma);
-    //lista_objetos_programa.push_back(plano);
+    lista_objetos_programa.push_back(skybox);
+    
     cout << "Crear buffers" << endl;
     for (int i = 0; i < lista_objetos_programa.size(); i++)
     {
@@ -157,11 +172,16 @@ void display(GLFWwindow* window)
         cout << "Buffer: " << i << " Creado" << endl;
     }
 
+    //Hay que llamar el método de createTerrainBuffer antes
+    plano.createTerrainBuffer(rawHighs, GWidth, GHeight);
+    lista_objetos_programa.push_back(plano);
+
     cout << "Todos los modelos han creado su buffer" << endl;
     //Cargan los shaders
     GLuint programIDP = LoadShaders( "vs1Texture.glsl", "fs1Texture.glsl"); //phong
 
     GLuint programID = programIDP;
+
     for (int i = 0; i < lista_objetos_programa.size(); i++) lista_objetos_programa[i].generate_VAOVBO();
     do
     {
@@ -169,7 +189,7 @@ void display(GLFWwindow* window)
         
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) programID = programIDP;
+        //if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) programID = programIDP;
         //if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) programID = programIDG;
         //if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) programID = programIDF;
         
@@ -180,29 +200,26 @@ void display(GLFWwindow* window)
 
         for (int i = 0; i < lista_objetos_programa.size(); i++)
         {
+
             File Current_model = lista_objetos_programa[i];
             glUseProgram(programID);//Cargan los shaders
-            if (camera_mode && i == 0)
+            if (i == 0)
             {
-                Current_model.rotate_modelFP(mov, radians(pitch_), radians(yaw_));
+                if (camera_mode) Current_model.rotate_modelFP(mov, radians(pitch_), radians(yaw_));
+                else Current_model.rotate_modelTP(mov, radians(yaw_));
                 Current_model.translate_model(mov, camera_mode);
-            }//--------------------------if donde se manda llamar la cámara 3era persona
-            /*else
-            {
-                Current_model.rotate_modelTP(pivot, radians(yaw_));
-                Current_model.translate_model(pivot, camera_mode);
-            }*/
+            }
 
             //VARIABLES UNIFORMES
             //Solo quedan dentro del ciclo for (al igual que los shaders) si se van a cambiar dependiendo del objeto
-
+            
             int idUniform = glGetUniformLocation(programID, "colorUniform");
             glUniform3f(idUniform, 1.0, 1.0, 1.0);
 
             int idFactorAmb = glGetUniformLocation(programID, "factorAmbiental");
             glUniform1f(idFactorAmb, 1.0f);
 
-            createMatrices(window);//Crea las matrices
+            createMatrices(window, lista_objetos_programa[0].getModelMatrix());//Crea las matrices
             //CARGA LAS MATRICES EN LOS SHADERS
             int modelLoc = glGetUniformLocation(programID, "model");
             glUniformMatrix4fv(modelLoc, 1, GL_FALSE, value_ptr(Current_model.getModelMatrix()));
@@ -217,13 +234,17 @@ void display(GLFWwindow* window)
 
             //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);//Directiva de dibujo, cantidad de indices, tipo de dato de indices, inicio de indices
             glDrawArrays(GL_TRIANGLES, 0, (Current_model.returnFaceaAmount() * 3));
+
+
+            
+            
         }
         glfwSwapBuffers(window);
 
         glfwPollEvents();
 
-        Mouse(window, initialTime);
-        //FPS
+        //Mouse(window, initialTime);
+        //Frames
         while (true)//Si duran mas que lo indicado
         {
             finalTime = glfwGetTime();
@@ -285,10 +306,10 @@ void processInput(GLFWwindow* window)
     if (glfwGetKey(window, GLFW_KEY_F1) == GLFW_PRESS) camera_mode = !camera_mode;
 }
 
-void createMatrices(GLFWwindow* window)
+void createMatrices(GLFWwindow* window, mat4 matrix_player)
 {
     //Vista
-    view = FPView(window, pitch_, yaw_);
+    view = FPView(window, pitch_, yaw_, matrix_player);
 
     //Proyección
     projection = perspective(radians(45.0f), (float)(resX / resY), 0.1f, 100.0f);//Ángulo de visión
@@ -296,42 +317,26 @@ void createMatrices(GLFWwindow* window)
 }
 
 //Ángulos en RADIANES
-mat4 FPView(GLFWwindow* window, float rotX, float rotY)
+mat4 FPView(GLFWwindow* window, float rotX, float rotY, mat4 player)
 {
     mat4 view;
-    float rotXr = radians(rotX);
-    float rotYr = radians(rotY);
+    rotX = radians(rotX);
+    rotY = radians(rotY);
 
 
-    if (camera_mode)
-    {
-        //**************************************APARTADO DE LA CÁMARA DE 1ERA PERSONA**************************************
-        //Rotacion en X
-        view = rotate(mat4(1.0f), rotXr, vec3(1.0f, 0.0f, 0.0f));
-        //Rotacion en Y
-        view = rotate(view, rotYr, vec3(0.0f, 1.0f, 0.0f));
-        forward_ = vec3(-view[2].x, 0.0f, view[2].z);
-        sides_ = vec3(view[0].x, 0.0f, -view[0].z);
-        //Traslacion
-        view = translate(view, mov);
-    }
-    else
-    {
-        //**************************************APARTADO DE LA CÁMARA DE 3ERA PERSONA**************************************
-        //Rotacion en Y
-        view = translate(mat4(1.0f), pivot);
-        view = rotate(view, rotYr, vec3(0.0f, -1.0f, 0.0f));
-        view = translate(mat4(1.0f), -pivot);
-        /*mat4 view_rotated = rotate(view, rotYr, vec3(0.0f, 1.0f, 0.0f));
-        forward_ = vec3(-view_rotated[2].x, 0.0f, view_rotated[2].z);
-        sides_ = vec3(view_rotated[0].x, 0.0f, -view_rotated[0].z);*/
+    //Rotacion en X
+    view = rotate(mat4(1.0f), rotX, vec3(1.0f, 0.0f, 0.0f));
 
-        forward_ = vec3(-view[2].x, 0.0f, view[2].z);
-        sides_ = vec3(view[0].x, 0.0f, -view[0].z);
+    //Rotacion en Y
+    view = rotate(view, rotY, vec3(0.0f, 1.0f, 0.0f));
 
-        //Traslacion
-        view = translate(view, pivot);
-    }
+
+    forward_ = vec3(-view[2].x, 0.0f, view[2].z);
+    sides_ = vec3(view[0].x, 0.0f, -view[0].z);
+
+
+    //Traslacion
+    view = translate(view, mov);
 
     return view;
 }
@@ -383,4 +388,21 @@ unsigned int LoadTexture(const char* texture_route)
     stbi_image_free(data);//Libera la información para no sobrecargar la memoria y evitar duplicidad de datos
 
     return texture;
+}
+
+
+void LoadNoiseTerrain()
+{
+    int width, height, nrChannels;
+    unsigned char* data = stbi_load("iceland_heightmap.png", &width, &height, &nrChannels, 0);
+    if (data) 
+    {
+        GWidth = width;
+        GHeight = height;
+        rawHighs.insert(rawHighs.end(), data, data + (GWidth * GHeight));
+        cout << "Loaded heightmap of size " << GHeight << " x " << *data << endl;
+    }
+    else cout << "Failed to load texture" << endl;
+    //for (vector<GLbyte>::iterator itr = rawHighs.begin(); itr != rawHighs.end(); (++itr)) cout << "ITR: " << (*itr) << endl;
+    stbi_image_free(data);
 }

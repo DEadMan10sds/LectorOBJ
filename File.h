@@ -70,6 +70,7 @@ class File
 		GLfloat return_YVertexList(int index);
 		GLfloat return_ZVertexList(int index);
 		void createBuffer();
+		void createTerrainBuffer(vector<GLbyte> heights, int width, int height);
 		GLfloat* getBuffer();
 		int returnBufferSize();
 		int returnFaceaAmount();
@@ -82,6 +83,7 @@ class File
 		void generate_VAOVBO();
 
 		mat4 getModelMatrix();
+		void setModelMatrix(mat4 matrix);
 
 		void freeBufferShaders();
 		void translate_model(vec3 position, bool camera_mode);

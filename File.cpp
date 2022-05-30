@@ -253,6 +253,126 @@ void File::createBuffer()
 	}
 }
 
+//GENERA EL ARRAY CON LOS DATOS EN ORDEN EDITANDO LAS ALTURAS
+void File::createTerrainBuffer(vector<GLbyte> heights, int width, int height)
+{
+	cout << "Asignar info buffer Terreno" << endl;
+	buffer_size = (faces_amount * 3 * 11);
+	cout << buffer_size << endl;
+	vector<GLbyte>::iterator heightIterator = heights.begin();
+	int color = 0;
+	float U, V;
+	list_Buffer_data.clear();
+	vector<Object>::iterator object_itr;
+	for (object_itr = list_object.begin(); object_itr != list_object.end(); (++object_itr))//Recorre cada objeto
+	{
+		vector<Face> objectFaces = object_itr->returnFaceList();
+		for (vector<Face>::iterator face_itr = objectFaces.begin(); face_itr != objectFaces.end(); (++face_itr))//Recorre las caras del objeto
+		{
+			vector<int> vertices_face = face_itr->returnVertexList();
+			vector<int> normal_face = face_itr->returnNormalList();
+			vector<int> texture_face = face_itr->returnTextureList();
+			int i = 0;
+			for (vector<int>::iterator index_face_list = vertices_face.begin(); index_face_list != vertices_face.end(); (++index_face_list))//Recorre los vértices de la cara del objeto
+			{
+				
+				//Textura - Similar a las normales
+				vector<TextureVertex>::iterator texture_index = list_texture_coord.begin();
+				vector<int>::iterator iterador_lista_texturas = (texture_face.begin() + i);
+				advance(texture_index, (*iterador_lista_texturas) - 1);
+				TextureVertex texture_aux = *texture_index;
+
+				
+				
+				
+
+				U = texture_aux.getU();
+				V = texture_aux.getV();
+
+				
+
+				//ORDEN DE BUFFER: POSICIÓN 3 - NORMAL 3 - COLOR 3 - TEXTURA 2
+				vector<Vertex>::iterator index_vertices = list_vertices.begin();//Asigna un iterador al inicio de la lista de vértices
+				advance(index_vertices, (*index_face_list) - 1);//Mueve el iterador hasta el vértice
+				Vertex vertice_aux = *index_vertices;
+				list_Buffer_data.push_back(vertice_aux.returnX());//Guarda todos los valores de coordenadas
+				
+
+				GLfloat newY;
+				int col = round(U * width);
+				int row = round(V * height);
+				int pos = col + row * height;
+				
+				
+				newY = (GLfloat)heightIterator[pos] / 25.0f;
+				//cout << i << endl;
+				
+				vertice_aux.setY(newY);
+				list_Buffer_data.push_back(vertice_aux.returnY());
+				list_Buffer_data.push_back(vertice_aux.returnZ());
+
+
+				//Almacenamiento de las normales
+				vector<Vertex>::iterator index_normal = list_normal.begin();
+				vector<int>::iterator iterador_lista_normales = (normal_face.begin() + i);
+				advance(index_normal, (*iterador_lista_normales) - 1);
+				Vertex normal_aux = *index_normal;
+				list_Buffer_data.push_back(normal_aux.returnX());
+				list_Buffer_data.push_back(normal_aux.returnY());
+				list_Buffer_data.push_back(normal_aux.returnZ());
+
+				/*cout << "Vertice: " << endl;
+				vertice_aux.showVertex_info();
+				cout << "Normal: " << endl;
+				normal_aux.showVertex_info();
+				cout << "Color: ";*/
+
+				if (color == 0)
+				{
+					list_Buffer_data.push_back(1);
+					//cout << " 1 ";
+				}
+				else
+
+				{
+					list_Buffer_data.push_back(0);
+					//cout << " 0 ";
+				}
+				if (color == 1)
+				{
+					list_Buffer_data.push_back(1);
+					//cout << " 1 ";
+				}
+				else
+				{
+					list_Buffer_data.push_back(0);
+					//cout << " 0 ";
+				}
+				if (color == 2)
+				{
+					list_Buffer_data.push_back(1);
+					//cout << " 1 " << endl;
+				}
+				else
+				{
+					list_Buffer_data.push_back(0);
+					//cout << " 0 " << endl;
+				}
+				color++;
+				if (color == 3)
+					color = 0;
+
+
+				
+				list_Buffer_data.push_back(texture_aux.getU());
+				list_Buffer_data.push_back(texture_aux.getV());
+				//texture_aux.showData();
+				i++;
+			}
+		}
+	}
+}
+
 GLfloat* File::getBuffer()
 {
 	return buffer;
@@ -327,6 +447,11 @@ void File::generate_VAOVBO()
 mat4 File::getModelMatrix()
 {
 	return ModelMatrix;
+}
+
+void File::setModelMatrix(mat4 matrix)
+{
+	ModelMatrix = matrix;
 }
 
 void File::freeBufferShaders()

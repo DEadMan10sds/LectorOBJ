@@ -34,3 +34,8 @@ GLfloat Vertex::returnZ()
 {
 	return z;
 }
+
+void Vertex::setY(GLfloat _y)
+{
+	y = _y;
+}
